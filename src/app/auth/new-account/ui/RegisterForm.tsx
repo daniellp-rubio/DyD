@@ -1,12 +1,22 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import clsx from "clsx";
 import Link from "next/link";
+import * as z from "zod";
+
+// Hook Form
 import { SubmitHandler, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+// Components
+import { If } from "@/components";
 
 // Actions
 import { login, registerUser } from "@/actions";
-import { useState } from "react";
+
+// Icons
+import { IoInformationOutline } from "react-icons/io5";
 
 interface FormInputs {
   name: string;
@@ -14,9 +24,23 @@ interface FormInputs {
   password: string;
 };
 
+const schema = z.object({
+  name: z.string().min(1, "El nombre es requerido."),
+  email: z.string().email("El email es invalido."),
+  password: z.string()
+    .min(8, "La contraseña debe tener al menos 8 caracteres. ")
+    .max(32, "La contraseña no debe superar los 32 caracteres.")
+});
+
 const RegisterForm = () => {
-  const [, setErrorMessage] = useState("");
-  const { register, handleSubmit, formState: {errors} } = useForm<FormInputs>();
+  const [errorMessage, setErrorMessage] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: {errors}
+  } = useForm<FormInputs>({
+    resolver: zodResolver(schema)
+  });
 
   const onSubmit: SubmitHandler<FormInputs> = async(data) => {
     setErrorMessage("");
@@ -39,49 +63,68 @@ const RegisterForm = () => {
       <input
         className={
           clsx(
-            "px-5 py-2 border bg-gray-200 rounded mb-5 text-palet-black",
+            "px-5 py-2 border bg-gray-200 rounded text-palet-black",
             {
               "border-red-500": errors.name
             }
           )
         }
         type="text"
+        id="name"
         autoFocus
-        {...register("name", {required: true})}
-        />
+        {...register("name")}
+      />
+
+      <p className="mb-5 text-red-500">{errors.name?.message}</p>
 
       <label htmlFor="email">Correo electronico</label>
       <input
         className={
           clsx(
-            "px-5 py-2 border bg-gray-200 rounded mb-5 text-palet-black",
+            "px-5 py-2 border bg-gray-200 rounded text-palet-black",
             {
               "border-red-500": errors.email
             }
           )
         }
         type="email"
-        {...register("email", {required: true, pattern: /^\S+@\S+$/i })}
+        id="email"
+        {...register("email")}
       />
+
+      <p className="mb-5 text-red-500">{errors.email?.message}</p>
 
       <label htmlFor="password">Contraseña</label>
       <input
         className={
           clsx(
-            "px-5 py-2 border bg-gray-200 rounded mb-5 text-palet-black",
+            "px-5 py-2 border bg-gray-200 rounded text-palet-black",
             {
               "border-red-500": errors.password
             }
           )
         }
         type="password"
-        {...register("password", {required: true, minLength: 8})}
+        id="password"
+        {...register("password")}
       />
 
+      <p className="mb-5 text-red-500">{errors.password?.message}</p>
 
+      <div
+        className="flex h-8 items-end space-x-1"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <If condition={errorMessage}>
+          <IoInformationOutline className="h-5 w-5 text-red-500" />
+          <p className="text-sm text-red-500">{errorMessage}</p>
+        </If>
+      </div>
 
       <button
-        className="btn-primary">
+        className="btn-primary"
+      >
         Crear cuenta
       </button>
 

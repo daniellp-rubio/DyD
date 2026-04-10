@@ -4,6 +4,9 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+// Components
+// import AddToCart from "./ui/add-to-cart";
+
 // interface
 import { Product } from "@/interfaces";
 
@@ -25,22 +28,28 @@ export const ProductGridItem = ({ product }: Props) => {
         <Image
           src={displayImage}
           alt={product.title}
-          className="w-full overflow-hidden rounded h-100"
-          width={2000}
-          height={2000}
-          onMouseEnter={() => setDisplayImage(product.images[1])}
+          className="w-full overflow-hidden rounded h-120 object-cover"
+          width={800}
+          height={800}
+          loading="lazy"
+          // onMouseEnter={() => setDisplayImage(product.images[1])}
           onMouseLeave={() => setDisplayImage(product.images[0])}
         />
       </Link>
 
       <div className="p-4 flex flex-col">
         <Link
-          className="hover:text-palet-orange"
           href={`/product/${product.slug}`}
         >
           {product.title}
         </Link>
-        <span className="font-bold">{formatToCOP(product.price)}</span>
+        <div>
+          <span className="font-bold">{formatToCOP(product.price)}</span>
+          <span className="font-bold">ㅤ</span>
+          <span className="font-bold"><del>{formatToCOP(product.price + 30000)}</del></span>
+        </div>
+
+        {/* <AddToCart product={product}/> */}
       </div>
     </div>
   )

@@ -1,5 +1,6 @@
 "use client";
 
+import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -15,11 +16,19 @@ const LoginForm = () => {
   const [errorMessage, formAction, isPending] = useActionState(authenticate, undefined);
   const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    if (errorMessage === "Sucess") {
-      // router.replace("/");
-      window.location.replace("/");
+  const showMessage = () => {
+    console.log("errorMessage", errorMessage)
+    if (errorMessage && errorMessage !== "Sucess") {
+      setShowPopup(true);
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 3000);
     };
+    if (errorMessage === "Sucess") window.location.replace("/");
+  };
+
+  useEffect(() => {
+    showMessage();
   }, [errorMessage]);
 
   const containerVariants = {

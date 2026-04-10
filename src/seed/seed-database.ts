@@ -1,4 +1,4 @@
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 
 // Seed
 import { initialData } from "./seed";
@@ -10,8 +10,10 @@ async function main() {
   await  prisma.orderItem.deleteMany();
   await  prisma.order.deleteMany();
 
+  await  prisma.userAddress.deleteMany();
   await  prisma.user.deleteMany();
   await  prisma.productImage.deleteMany();
+  await  prisma.productRatings.deleteMany();
   await  prisma.product.deleteMany();
   await  prisma.category.deleteMany();
 
@@ -29,23 +31,31 @@ async function main() {
 
   const categoriesDB = await prisma.category.findMany();
 
-  const categoriesMap = categoriesDB.reduce((map, category) => {
+  const categoriesMap = categoriesDB.reduce((map: any, category: any) => {
     map[category.name.toLowerCase()] = category.id;
     return map;
   }, {} as Record<string, string>);
 
   products.forEach(async(product) => {
-    const { type, images, ...rest } = product
+    const { type, images, descriptionImages, ...rest } = product;
+    const categoryId = categoriesMap[type];
+
+    if (!categoryId) {
+      console.warn(`No se encontró categoría para el tipo: ${type}, producto omitido.`);
+      return;
+    };
 
     const dbProduct = await prisma.product.create({
       data: {
         ...rest,
-        categoryId: categoriesMap[type]
+        categoryId,
+        descriptionImages: descriptionImages ?? []
       }
-    })
+    });
 
-    const imagesData = images.map(image => ({
+    const imagesData = images.map((image, index) => ({
       url: image,
+      position: index,
       productId: dbProduct.id
     }));
 
