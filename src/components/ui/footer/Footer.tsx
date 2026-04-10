@@ -7,16 +7,21 @@ import { BsWhatsapp } from "react-icons/bs";
 
 export const Footer = () => {
   return (
-    <footer className="w-full text-xs py-6 text-center">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-center items-center gap-4">
-        {/* Enlaces */}
-        <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 text-sm">
-          <Link href="/" className="hover:underline">
-            <span className="font-bold">D&D</span> | Shop {new Date().getFullYear()}
-          </Link>
-          <Link href="/contactus" className="hover:underline">Contáctenos</Link>
-          <Link href="/termsandconditions" className="hover:underline">Privacidad & Legal</Link>
-        </div>
+    <div className="flex w-full justify-center text-xs mb-10">
+      <Link
+        href="/"
+      >
+        <span className={`antialiased font-bold`}>DYD Tech</span>
+        <span> | Shop</span>
+        <span>  {new Date().getFullYear()}</span>
+      </Link>
+
+      <Link
+        href="/"
+        className="mx-3"
+      >
+        Privacidad & Legal
+      </Link>
 
         <div className="flex space-x-4">
           <a href="https://www.facebook.com/profile.php?id=61570094964123" target="_blank" aria-label="Facebook" className="hover:opacity-75">

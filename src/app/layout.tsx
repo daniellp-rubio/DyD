@@ -13,8 +13,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    template:  "%s - D&D | Gadgets",
-    default: "Home - D&D | Gadgets"
+    template:  "%s - DYD Tech | Gadgets",
+    default: "Home - DYD Tech | Gadgets"
   },
   description: "Los mejores accesorios para el dia a dia aqui. Relojes inteligentes, Airpods, Parlantes, Gadgets y más",
   keywords: ["gadgets", "accesorios", "tecnología", "relojes inteligentes", "airpods", "parlantes"],
