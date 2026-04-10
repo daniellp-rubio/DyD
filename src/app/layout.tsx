@@ -11,8 +11,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    template:  "%s - D&D | Gadgets",
-    default: "Home - D&D | Gadgets"
+    template:  "%s - DYD Tech | Gadgets",
+    default: "Home - DYD Tech | Gadgets"
   },
   description: "Accesorios tecnológicos",
 };

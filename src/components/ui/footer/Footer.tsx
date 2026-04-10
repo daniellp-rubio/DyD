@@ -6,7 +6,7 @@ export const Footer = () => {
       <Link
         href="/"
       >
-        <span className={`antialiased font-bold`}>D&D</span>
+        <span className={`antialiased font-bold`}>DYD Tech</span>
         <span> | Shop</span>
         <span>  {new Date().getFullYear()}</span>
       </Link>
