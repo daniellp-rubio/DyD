@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 
 // Actions
 import { authenticate } from "@/actions";
-import { If } from "@/components";
+import { If, Turnstile } from "@/components";
 import { IoInformationOutline, IoMailOutline, IoLockClosedOutline, IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import { CgSpinner } from "react-icons/cg";
 import clsx from "clsx";
@@ -16,13 +16,10 @@ const LoginForm = () => {
   const [errorMessage, formAction, isPending] = useActionState(authenticate, undefined);
   const [showPassword, setShowPassword] = useState(false);
 
-  const showMessage = () => {
-    console.log("errorMessage", errorMessage)
-    if (errorMessage && errorMessage !== "Sucess") {
-      setShowPopup(true);
-      setTimeout(() => {
-        setShowPopup(false);
-      }, 3000);
+  useEffect(() => {
+    if (errorMessage === "Success") {
+      // router.replace("/");
+      window.location.replace("/");
     };
     if (errorMessage === "Sucess") window.location.replace("/");
   };
@@ -96,6 +93,10 @@ const LoginForm = () => {
             {showPassword ? <IoEyeOffOutline className="h-5 w-5" /> : <IoEyeOutline className="h-5 w-5" />}
           </button>
         </div>
+      </motion.div>
+
+      <motion.div variants={itemVariants}>
+        <Turnstile />
       </motion.div>
 
       <div
