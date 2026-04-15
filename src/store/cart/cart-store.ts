@@ -1,7 +1,7 @@
 import { create } from "zustand";
+import { CartProduct } from "@/interfaces";
 
 // Interface
-import { CartProduct } from "@/interfaces";
 import { persist } from "zustand/middleware";
 
 interface State {

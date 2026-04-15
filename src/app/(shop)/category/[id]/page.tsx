@@ -39,6 +39,7 @@ export default async function CategoryPage({ params }: Props) {
 
       <ProductGrid
         products={products}
+        tag={id}
       />
     </div>
   );

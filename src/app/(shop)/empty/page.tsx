@@ -5,7 +5,7 @@ import { IoCartOutline } from "react-icons/io5";
 
 export default function EmptyPage() {
   return (
-    <div className="flex justify-center items-center h-[800px]">
+    <div className="flex justify-center items-center h-[690px]">
       <IoCartOutline size={80} className="mx-5" />
 
       <div className="flex flex-col items-center">
@@ -15,7 +15,7 @@ export default function EmptyPage() {
 
         <Link
           href="/"
-          className="text-blue-500 mt-2 text-4xl"
+          className="text-palet-orange mt-2 text-4xl"
         >
           Regresar
         </Link>

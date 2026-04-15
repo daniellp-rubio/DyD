@@ -16,12 +16,6 @@ export const authConfig: NextAuthConfig = {
       console.log(auth);
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith(nextUrl.pathname);
-      if (isOnDashboard) {
-        if (isLoggedIn) return true;
-        return false;
-      } else if (isLoggedIn) {
-        return true;
-      }
       return true;
     },
     jwt({ token, user }) {

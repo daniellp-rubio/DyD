@@ -26,7 +26,7 @@ const StockLabel = ({ slug }: Props) => {
   return (
     <>
       <If condition={!isLoading}>
-        <h1 className={`antialiased font-bold text-lg`}>
+        <h1 className={`antialiased font-bold text-sm`}>
           Disponibles: {stock}
         </h1>
       </If>
