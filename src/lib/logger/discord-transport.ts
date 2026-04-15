@@ -18,11 +18,10 @@ const COLORS = {
 export const sendToDiscord = async ({ level, title, message, metadata, error }: DiscordMessageParams) => {
   if (level === "debug") return; // Usually we don't send debug to Discord
 
-  // URL routing based on user specifications
-  const infoUrl = process.env.DISCORD_WEBHOOK_URL_INFO || "https://discord.com/api/webhooks/1492253623248224356/Yc6XQKYx8xi2SYeiNdAVvmhK4d6y1bOGVCxUzj4MjJio0Lucx1wvOOtpqFYBZIUdKKnY";
-  const errorUrl = process.env.DISCORD_WEBHOOK_URL_ERRORS;
-
-  const webhookUrl = level === "info" ? infoUrl : errorUrl;
+  const webhookUrl =
+    level === "info"
+      ? process.env.DISCORD_WEBHOOK_URL_INFO
+      : process.env.DISCORD_WEBHOOK_URL_ERRORS;
 
   if (!webhookUrl) {
     console.warn(`[Discord Logger] Missing webhook URL for level: ${level}`);
