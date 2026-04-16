@@ -13,9 +13,10 @@
 }
 
 @theme {
-  --color-palet-orange: #FFA500;
-  --color-palet-orange-dark: #F09B00;
-  --color-palet-hover-orange: #FFAC13;
+  --color-palet-orange: #FF7043;
+  --color-palet-orange-dyd: #FF7043;
+  --color-palet-orange-dark: #FA5723;
+  --color-palet-hover-orange: #FF8157;
   --color-palet-black: #1C1C1C;
   --color-palet-found-black: #2C2C2C;
 }
@@ -31,7 +32,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans, 'Inter', sans-serif);
 }
 
 @keyframes fadeIn {
@@ -55,7 +56,7 @@ body {
 }
 
 .btn-primary {
-  @apply bg-palet-orange hover:bg-palet-hover-orange text-white py-2 px-4 rounded transition-all cursor-pointer;
+  @apply bg-palet-orange-dyd hover:bg-palet-hover-orange text-white py-2 px-4 rounded transition-all cursor-pointer;
 }
 
 .btn-secondary {
@@ -64,4 +65,42 @@ body {
 
 .btn-disabled {
   @apply bg-palet-orange-dark text-white py-2 px-4 rounded transition-all cursor-pointer;
+}
+
+.btn-danger {
+  @apply bg-red-500 hover:bg-red-700 text-white py-2 px-4 transition-all cursor-pointer;
+}
+
+/* POPUS */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(40px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s cubic-bezier(.4,0,.2,1) both;
+}
+
+/* ANIMATE MOVE LEFT */
+@keyframes move-left-right {
+  0% { transform: translateX(-30px);}
+  50% { transform: translateX(30px);}
+  100% { transform: translateX(-30px);}
+}
+.animate-move-left-right {
+  animation: move-left-right 2s ease-in-out infinite;
+}
+
+/* ANIMATE WIGGLE */
+@keyframes wiggle {
+  0%, 93%, 100% { transform: translateX(0); }
+  94% { transform: translateX(-5px); }
+  95% { transform: translateX(5px); }
+  96% { transform: translateX(-5px); }
+  97% { transform: translateX(5px); }
+  98% { transform: translateX(-5px); }
+  99% { transform: translateX(5px); }
+}
+
+.animate-wiggle {
+  animation: wiggle 5s ease-in-out infinite;
 }

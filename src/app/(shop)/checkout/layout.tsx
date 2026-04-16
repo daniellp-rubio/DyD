@@ -7,7 +7,7 @@ const CheckoutLayout = async({children}: {
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/auth/login?redirectTo=/checkout/address")
+    redirect("/payment/withoutsession?redirectTo=/checkout/address")
   };
 
   return (

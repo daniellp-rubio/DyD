@@ -1,5 +1,10 @@
 import Link from "next/link";
 
+// Icons
+import { FaFacebook } from "react-icons/fa";
+import { AiFillInstagram } from "react-icons/ai";
+import { BsWhatsapp } from "react-icons/bs";
+
 export const Footer = () => {
   return (
     <div className="flex w-full justify-center text-xs mb-10">
