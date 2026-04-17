@@ -15,6 +15,9 @@ export const metadata: Metadata = {
     default: "Home - DYD Tech | Gadgets"
   },
   description: "Accesorios tecnológicos",
+  icons: {
+    icon: "/favicon_(640x640px).png"
+  }
 };
 
 export default function RootLayout({
