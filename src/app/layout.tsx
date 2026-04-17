@@ -16,50 +16,9 @@ export const metadata: Metadata = {
     template:  "%s - DYD Tech | Gadgets",
     default: "Home - DYD Tech | Gadgets"
   },
-  description: "Los mejores accesorios para el dia a dia aqui. Relojes inteligentes, Airpods, Parlantes, Gadgets y más",
-  keywords: ["gadgets", "accesorios", "tecnología", "relojes inteligentes", "airpods", "parlantes"],
-  openGraph: {
-    title: "D&D | Gadgets",
-    description: "Los mejores accesorios para el día a día aquí.",
-    url: process.env.MERCADOPAGO_NOTIFICATION_URL,
-    siteName: "D&D | Gadgets",
-    images: [
-      {
-        url: "./favicon.ico",
-        width: 800,
-        height: 600,
-        alt: "Logo D&D Gadgets"
-      }
-    ],
-    locale: "es_CO",
-    type: "website"
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "D&D | Gadgets",
-    description: "Los mejores accesorios para el día a día aquí.",
-    images: ["./favicon.ico"]
-  },
-  authors: [
-    { name: "D&D Gadgets", url: process.env.MERCADOPAGO_NOTIFICATION_URL }
-  ],
-  creator: "D&D Gadgets",
-  publisher: "D&D Gadgets",
-  robots: {
-    index: true,
-    follow: true,
-    nocache: false,
-    googleBot: {
-      index: true,
-      follow: true,
-      noimageindex: false
-    }
-  },
-  category: "ecommerce",
-  applicationName: "D&D Gadgets",
-  generator: "Next.js 14",
-  other: {
-    "facebook-domain-verification": "ewsdpsyyjrp2g5k03di6pbhs9z9vl2"
+  description: "Accesorios tecnológicos",
+  icons: {
+    icon: "/favicon_(640x640px).png"
   }
 };
 
