@@ -1,84 +1,107 @@
 'use server';
 
-import { signIn } from '@/auth-config';
 import { AuthError } from 'next-auth';
+import { z } from 'zod';
+
+import { signIn } from '@/auth-config';
 import { Logger } from '@/lib/logger';
+import { rateLimit, getClientIp } from '@/lib/security/rate-limit';
+import { verifyTurnstile } from '@/lib/security/turnstile';
+
+const loginSchema = z.object({
+  email: z.string().trim().toLowerCase().email().max(254),
+  password: z.string().min(8).max(128),
+});
+
+const maskEmail = (email?: string | null) =>
+  email && email.length > 2 ? `${email.substring(0, 2)}***@***` : 'unknown';
+
+async function guard(email: string) {
+  const ip = await getClientIp();
+
+  const ipRl = rateLimit(`login:ip:${ip}`, 20, 10 * 60 * 1000);
+  if (!ipRl.allowed) return { allowed: false as const, reason: 'Demasiados intentos desde esta IP.' };
+
+  const emailRl = rateLimit(`login:email:${email}`, 10, 10 * 60 * 1000);
+  if (!emailRl.allowed) return { allowed: false as const, reason: 'Demasiados intentos para esta cuenta.' };
+
+  return { allowed: true as const, ip };
+}
 
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
 ) {
+  const parsed = loginSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+  });
+
+  if (!parsed.success) return 'Invalid credentials.';
+
+  const g = await guard(parsed.data.email);
+  if (!g.allowed) return g.reason;
+
+  const captchaOk = await verifyTurnstile(
+    formData.get('cf-turnstile-response') as string | null,
+    g.ip,
+  );
+  if (!captchaOk) return 'Verificación anti-bot fallida';
+
   try {
-    const email = formData.get('email') as string;
-    // Log auth intent
     Logger.info({
       title: 'Login Attempt',
-      message: 'A user is trying to authenticate via UI form.',
-      metadata: { email: email ? email.substring(0, 3) + '***@***' : 'Unknown' }
+      message: 'User trying to authenticate.',
+      metadata: { email: maskEmail(parsed.data.email) },
     });
 
     await signIn('credentials', {
-      ...Object.fromEntries(formData),
+      email: parsed.data.email,
+      password: parsed.data.password,
       redirect: false,
     });
 
-    Logger.info({
-      title: 'Login Success',
-      message: 'User authenticated successfully via UI.',
-      metadata: { email: email ? email.substring(0, 3) + '***@***' : 'Unknown' }
-    });
-
-    return "Sucess";
+    return 'Success';
   } catch (error) {
     if (error instanceof AuthError) {
       Logger.warn({
         title: 'Login Warning',
-        message: 'Auth Error encountered.',
-        metadata: { 
-          type: error.type,
-          message: error.message,
-          cause: String(error.cause)
-        },
-        error // Pasamos el objecto nativo a Discord Transport
+        message: 'Auth error encountered.',
+        metadata: { type: error.type, email: maskEmail(parsed.data.email) },
+        error,
       });
-
-      switch (error.type) {
-        case 'CredentialsSignin':
-          return 'Invalid credentials.';
-        default:
-          return 'Something went wrong.';
-      };
-    };
+      return 'Invalid credentials.';
+    }
 
     Logger.error({
       title: 'Login Crash',
-      message: 'An unexpected exception occurred during UI login.',
-      error
+      message: 'Unexpected exception during login.',
+      error,
     });
     throw error;
-  };
-};
+  }
+}
 
-export const login = async(email: string, password: string) => {
+export const login = async (email: string, password: string) => {
+  const parsed = loginSchema.safeParse({ email, password });
+  if (!parsed.success) return { ok: false, message: 'Credenciales inválidas' };
+
+  const g = await guard(parsed.data.email);
+  if (!g.allowed) return { ok: false, message: g.reason };
+
   try {
-    Logger.info({
-      title: 'Direct Login Attempt',
-      message: 'Authenticating direct credentials.',
-      metadata: { email: email.substring(0, 3) + '***@***' }
+    await signIn('credentials', {
+      email: parsed.data.email,
+      password: parsed.data.password,
+      redirect: false,
     });
-    await signIn('credentials', {email, password});
-    return {
-      ok: true
-    }
+    return { ok: true };
   } catch (error) {
     Logger.error({
       title: 'Direct Login Failed',
       message: 'No se pudo iniciar sesión',
-      error
+      error,
     });
-    return {
-      ok: false,
-      message: "No se pudo iniciar sesión"
-    }
+    return { ok: false, message: 'No se pudo iniciar sesión' };
   }
 };
