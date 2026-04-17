@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import clsx from "clsx";
 import Link from "next/link";
 import { useState } from "react";
@@ -24,6 +25,14 @@ interface FormInputs {
   email: string;
   password: string;
 }
+
+const schema = z.object({
+  name: z.string().min(1, "El nombre es requerido."),
+  email: z.string().email("El email es invalido."),
+  password: z.string()
+    .min(8, "La contraseña debe tener al menos 8 caracteres. ")
+    .max(32, "La contraseña no debe superar los 32 caracteres.")
+});
 
 const RegisterForm = () => {
   const [errorMessage, setErrorMessage] = useState("");
