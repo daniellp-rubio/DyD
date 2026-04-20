@@ -15,19 +15,23 @@ interface Props {
   title: string,
   id: string,
   total: number,
-  isPaid: boolean
+  isPaid: boolean,
+  buyerEmail: string
 };
 
-export const ButtonPaid = ({ title, id, total, isPaid }: Props) => {
+export const ButtonPaid = ({ title, id, total, isPaid, buyerEmail }: Props) => {
   const [loading, setLoading] = useState(false);
-
-  console.log("isPaid", isPaid);
-
   const handleCheckout = async () => {
     setLoading(true);
-    const url = await submitMessage(title, id, total);
-    window.open(url, "_blank");
-    setLoading(false);
+    try {
+      const url = await submitMessage(title, id, total, buyerEmail);
+      window.location.href = url;
+    } catch (error) {
+      console.error("Error al iniciar el pago:", error);
+      alert("No se pudo iniciar el pago. Intenta nuevamente.");
+    } finally {
+      setLoading(false);
+    };
   };
 
   return (
@@ -50,24 +54,6 @@ export const ButtonPaid = ({ title, id, total, isPaid }: Props) => {
           <SiMercadopago color="black" size={40} />
           <span className="text-base font-medium">Pagar con Mercado Pago</span>
         </button>
-
-        <div className={
-          clsx(
-            "flex items-center rounded-lg py-2 px-3.5 text-xs font-bold text-white mb-5",
-            {
-              'bg-red-500': !isPaid,
-              'bg-green-700': isPaid,
-            }
-          )
-        }>
-          <IoCardOutline size={30} />
-          {/* <span className="mx-2">Pendiente</span> */}
-          <span className="mx-2">
-            {
-              isPaid ? "Pagada" : "No pagada"
-            }
-          </span>
-        </div>
       </If>
     </>
   );

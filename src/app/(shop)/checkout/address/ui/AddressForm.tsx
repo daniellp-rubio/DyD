@@ -2,9 +2,19 @@
 
 import clsx from "clsx";
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+// Components
+import { If } from "@/components";
+
+// Icons
+import { IoInformationOutline } from "react-icons/io5";
+
+// Hook Form
+import { zodResolver } from "@hookform/resolvers/zod";
 
 // Actions
 import { deleteUserAddress, setUserAddress } from "@/actions";
@@ -30,14 +40,32 @@ interface Props {
   userStoredAddress?: Partial<Address>
 };
 
+const schema = z.object({
+  firstName: z.string().min(1, "El nombre es requerido."),
+  lastName: z.string().min(1, "El apellido es requerido."),
+  address: z.string().min(1, "La dirección es requerido."),
+  address2: z.string().max(50, "La dirección 2 es requerido.").optional(),
+  postalCode: z.string().min(1, "El código postal es requerido."),
+  city: z.string().min(1, "La cuidad es requerido."),
+  phone: z.string().min(1, "El telefono es requerido."),
+  rememberAddress: z.boolean()
+});
+
 const AddressForm = ({ userStoredAddress = {} }: Props) => {
-  const router = useRouter();
-  const { handleSubmit, register, formState: { isValid }, reset } = useForm<FormInputs>({
+  const [errorMessage, setErrorMessage] = useState("");
+  const {
+    handleSubmit,
+    register,
+    formState: { errors, isValid },
+    reset
+  } = useForm<FormInputs>({
+    resolver: zodResolver(schema),
     defaultValues: {
       ...userStoredAddress,
       rememberAddress: false
-    },
+    }
   });
+  const router = useRouter();
 
   const { data: session } = useSession({
     required: true,
@@ -53,6 +81,7 @@ const AddressForm = ({ userStoredAddress = {} }: Props) => {
   }, [address]);
 
   const onSubmit = async(data: FormInputs) => {
+    setErrorMessage("");
     const { rememberAddress, ...restAddress } = data;
     setAddress(data);
 
@@ -71,27 +100,55 @@ const AddressForm = ({ userStoredAddress = {} }: Props) => {
         <span>Nombres</span>
         <input
           type="text"
-          className="p-2 border rounded-md bg-gray-200 text-black"
-          {...register("firstName", {required: true})}
+          className={
+            clsx(
+              "p-2 border rounded-md bg-gray-200 text-black",
+              {
+                "border-red-500": errors.firstName
+              }
+            )
+          }
+          {...register("firstName")}
         />
+
+        <p className="text-red-500">{errors.firstName?.message}</p>
       </div>
+
 
       <div className="flex flex-col mb-2">
         <span>Apellidos</span>
         <input
           type="text"
-          className="p-2 border rounded-md bg-gray-200 text-black"
-          {...register("lastName", {required: true})}
+          className={
+            clsx(
+              "p-2 border rounded-md bg-gray-200 text-black",
+              {
+                "border-red-500": errors.lastName
+              }
+            )
+          }
+          {...register("lastName")}
         />
+
+        <p className="text-red-500">{errors.lastName?.message}</p>
       </div>
 
       <div className="flex flex-col mb-2">
         <span>Dirección</span>
         <input
           type="text"
-          className="p-2 border rounded-md bg-gray-200 text-black"
-          {...register("address", {required: true})}
+          className={
+            clsx(
+              "p-2 border rounded-md bg-gray-200 text-black",
+              {
+                "border-red-500": errors.address
+              }
+            )
+          }
+          {...register("address")}
         />
+
+        <p className="text-red-500">{errors.address?.message}</p>
       </div>
 
       <div className="flex flex-col mb-2">
@@ -108,27 +165,54 @@ const AddressForm = ({ userStoredAddress = {} }: Props) => {
         <span>Código postal</span>
         <input
           type="text"
-          className="p-2 border rounded-md bg-gray-200 text-black"
-          {...register("postalCode", {required: true})}
+          className={
+            clsx(
+              "p-2 border rounded-md bg-gray-200 text-black",
+              {
+                "border-red-500": errors.postalCode
+              }
+            )
+          }
+          {...register("postalCode")}
         />
+
+        <p className="text-red-500">{errors.postalCode?.message}</p>
       </div>
 
       <div className="flex flex-col mb-2">
         <span>Ciudad</span>
         <input
           type="text"
-          className="p-2 border rounded-md bg-gray-200 text-black"
-          {...register("city", {required: true})}
+          className={
+            clsx(
+              "p-2 border rounded-md bg-gray-200 text-black",
+              {
+                "border-red-500": errors.city
+              }
+            )
+          }
+          {...register("city")}
         />
+
+        <p className="text-red-500">{errors.city?.message}</p>
       </div>
 
       <div className="flex flex-col mb-2">
         <span>Teléfono</span>
         <input
           type="text"
-          className="p-2 border rounded-md bg-gray-200 text-black"
-          {...register("phone", {required: true})}
+          className={
+            clsx(
+              "p-2 border rounded-md bg-gray-200 text-black",
+              {
+                "border-red-500": errors.phone
+              }
+            )
+          }
+          {...register("phone")}
         />
+
+        <p className="text-red-500">{errors.phone?.message}</p>
       </div>
 
       <div className="flex flex-col mb-2 sm:mt-1">
@@ -165,8 +249,18 @@ const AddressForm = ({ userStoredAddress = {} }: Props) => {
           <span>Recordar dirección</span>
         </div>
 
+        {/* <div
+          className="flex h-8 items-end space-x-1"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <If condition={errorMessage}>
+            <IoInformationOutline className="h-5 w-5 text-red-500" />
+            <p className="text-sm text-red-500">{errorMessage}</p>
+          </If>
+        </div> */}
+
         <button
-          disabled={!isValid}
           // href='/checkout'
           // className="btn-primary flex w-full sm:w-1/2 justify-center"
           className={

@@ -8,7 +8,6 @@ import OrderSummary from "./ui/OrderSummary";
 
 export default function CartPage() {
 
-  // redirect("/empty");
 
   return (
     <div className="flex justify-center items-center mb-72 px-10 sm:px-0">
