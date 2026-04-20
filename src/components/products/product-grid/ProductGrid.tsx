@@ -10,7 +10,7 @@ interface Props {
 
 export const ProductGrid = ({ products, tag }: Props) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-30 px-6 sm:px-0 mb-10">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 mb-10">
       {
         [...products]
           .filter(product =>

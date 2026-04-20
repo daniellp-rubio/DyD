@@ -20,7 +20,7 @@ interface Props {
 
 export const ProductMobileSlideshow = ({ images, title, className }: Props) => {
   return (
-    <div className={className}>
+    <div className={className} aria-label={`Galería de imágenes de ${title}`}>
       <Swiper
         style={{
           width: "100vw",
@@ -40,8 +40,10 @@ export const ProductMobileSlideshow = ({ images, title, className }: Props) => {
                 width={2000}
                 height={2000}
                 src={`${image}`}
-                alt={title}
-                className="object-fill"
+                alt={`${title} - imagen ${index + 1}`}
+                priority={index === 0}
+                sizes="100vw"
+                className="object-cover"
               />
             </SwiperSlide>
           ))
