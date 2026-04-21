@@ -1,21 +1,18 @@
 'use client';
 
-import cslx from "clsx";
+import { useEffect, useState } from "react";
+import clsx from "clsx";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-// Components
 import { If } from "@/components";
 import ViewRolUser from "./viewRoles/ViewRolUser";
 import ViewRolAdmin from "./viewRoles/ViewRolAdmin";
 
-// Store
 import { useUIStore } from "@/store";
-
-// Actions
 import { logout } from "@/actions";
 
-// Icons
 import {
   IoCloseOutline,
   IoLogInOutline,
@@ -24,71 +21,93 @@ import {
 } from "react-icons/io5";
 
 export const Sidebar = () => {
+  const router = useRouter();
   const isSideMenuOpen = useUIStore(state => state.isSideMenuOpen);
   const closeSideMenu = useUIStore(state => state.closeSideMenu);
 
-  const {data: session} = useSession();
+  const { data: session } = useSession();
   const isAuthenticated = !!session?.user;
-  const rolUser = session?.user?.role;
+  const rolUser = session?.user?.role as "user" | "admin" | undefined;
+
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    if (!isSideMenuOpen) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeSideMenu();
+    };
+
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [isSideMenuOpen, closeSideMenu]);
 
   const onLogout = async () => {
-    await logout();
-    window.location.reload();
     closeSideMenu();
+    await logout();
+    router.refresh();
+  };
+
+  const onSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = query.trim();
+    if (!q) return;
+    closeSideMenu();
+    router.push(`/products?query=${encodeURIComponent(q)}`);
+    setQuery("");
   };
 
   return (
-    <div>
+    <>
       <If condition={isSideMenuOpen}>
         <div
-          className="fixed top-0 left-0 w-screen h-screen z-10 bg-black opacity-30"
-          />
-      </If>
-
-      <If condition={isSideMenuOpen}>
-        <div
-          onClick={() => closeSideMenu()}
-          className="fade-in fixed top-0 left-0 w-screen h-screen z-10 backdrop-filter backdrop-blur-sm"
+          onClick={closeSideMenu}
+          aria-hidden
+          className="fade-in fixed inset-0 z-10 bg-white/30 backdrop-blur-sm"
         />
       </If>
 
       <nav
-        className={
-          cslx(
-            "fixed p-5 right-0 top-0 w-[220px] sm:w-[350px] md:w-[420px] lg:w-[500px] h-screen bg-palet-black z-20 shadow-2xl transform transform-all duration-300",
-            {
-              "translate-x-full": !isSideMenuOpen
-            }
-          )
-        }
+        aria-label="Menú lateral"
+        aria-hidden={!isSideMenuOpen}
+        className={clsx(
+          "fixed right-0 top-0 z-20 h-screen w-[220px] bg-brand-white p-5 text-brand-black shadow-2xl transition-transform duration-300 sm:w-[350px] md:w-[420px] lg:w-[500px]",
+          { "translate-x-full": !isSideMenuOpen }
+        )}
       >
-        <IoCloseOutline
-          size={50}
-          className="absolute top-5 right-5 cursor-pointer"
-          onClick={() => closeSideMenu()}
-        />
+        <button
+          type="button"
+          aria-label="Cerrar menú"
+          onClick={closeSideMenu}
+          className="absolute right-5 top-5 text-brand-black transition-colors hover:text-brand-orange"
+        >
+          <IoCloseOutline size={50} />
+        </button>
 
-        <div className="relative mt-14">
-          <IoSearchOutline size={20} className="absolute top-2 left-2" />
-
+        <form onSubmit={onSearch} className="relative mt-14">
+          <IoSearchOutline size={20} className="absolute left-2 top-2 text-brand-smoke" />
           <input
-            type="text"
+            type="search"
+            autoComplete="off"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar productos..."
-            className="w-full bg-palet-found-black rounded pl-10 py-1 pr-10 border-b-2 text-xl border-gray-200 focus:outline-none focus:border-palet-orange"
+            className="w-full rounded border-b-2 border-brand-smoke/40 bg-brand-white py-1 pl-10 pr-10 text-xl text-brand-black placeholder:text-brand-smoke focus:border-brand-orange focus:outline-none"
           />
-        </div>
+        </form>
 
-        <ViewRolUser
-          rolUser={rolUser}
-          closeSideMenu={closeSideMenu}
-        />
+        <ViewRolUser rolUser={rolUser} closeSideMenu={closeSideMenu} />
 
         <If condition={isAuthenticated}>
           <button
-            onClick={() => {
-              onLogout();
-            }}
-            className="flex items-center mt-10 p-2 hover:bg-gray100 rounded transition-all"
+            type="button"
+            onClick={onLogout}
+            className="mt-10 flex w-full items-center rounded p-2 text-brand-black transition-colors hover:bg-brand-smoke/20 hover:text-brand-orange"
           >
             <IoLogOutOutline size={30} />
             <span className="ml-3 text-xl">Salir</span>
@@ -98,19 +117,19 @@ export const Sidebar = () => {
         <If condition={!isAuthenticated}>
           <Link
             href="/auth/login"
-            className="flex items-center mt-10 p-2 hover:bg-gray100 rounded transition-all"
+            onClick={closeSideMenu}
+            className="mt-10 flex items-center rounded p-2 text-brand-black transition-colors hover:bg-brand-smoke/20 hover:text-brand-orange"
           >
             <IoLogInOutline size={30} />
             <span className="ml-3 text-xl">Ingresar</span>
           </Link>
         </If>
 
-        <div className="w-full h-px bg-gray-200 my-10" />
-
-        <ViewRolAdmin
-          rolUser={rolUser}
-        />
+        <If condition={rolUser === "admin"}>
+          <div className="my-10 h-px w-full bg-brand-smoke/40" />
+          <ViewRolAdmin rolUser={rolUser} closeSideMenu={closeSideMenu} />
+        </If>
       </nav>
-    </div>
-  )
-}
+    </>
+  );
+};
