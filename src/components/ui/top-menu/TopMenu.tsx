@@ -26,7 +26,7 @@ export const TopMenu = () => {
   }, []);
 
   return (
-    <nav className="flex px-5 justify-between items-center w-full">
+    <nav className="fixed top-0 left-0 right-0 z-50 flex px-5 justify-between items-center w-full bg-palet-black">
 
       {/* Logo */}
       <div>
@@ -56,12 +56,12 @@ export const TopMenu = () => {
 
       {/* Search, Cart, Menu */}
       <div className="flex items-center">
-        <Link
+        {/* <Link
           className="mx-2"
           href="/search"
         >
           <IoSearchOutline className="w-5 h-5" />
-        </Link>
+        </Link> */}
 
         <Link
           className="mx-2"

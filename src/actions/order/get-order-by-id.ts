@@ -23,6 +23,11 @@ export const getOrderById = async(id: string) => {
         OrderAddress: {
           where: { orderId: id }
         },
+        user: {
+          select: {
+            email: true
+          }
+        },
         OrderItem: {
           where: { orderId: id },
           select: {
@@ -32,6 +37,8 @@ export const getOrderById = async(id: string) => {
             select: {
               title: true,
               slug: true,
+              description: true,
+              category: true,
               ProductImage: {
                 select: {
                   url: true
@@ -44,7 +51,6 @@ export const getOrderById = async(id: string) => {
         },
     });
 
-    console.log(orderById);
     if (!orderById) throw `${id} no existe`;
 
     if(session.user.role === "user") {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -20,6 +21,11 @@ const LoginForm = () => {
       // router.replace("/");
       window.location.replace("/");
     };
+    if (errorMessage === "Sucess") window.location.replace("/");
+  };
+
+  useEffect(() => {
+    showMessage();
   }, [errorMessage]);
 
   const containerVariants = {
