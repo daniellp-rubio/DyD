@@ -1,46 +1,35 @@
 import Link from "next/link";
 
-// Components
 import { If } from "@/components/if/If";
 
-// Icons
 import { HiOutlineDeviceMobile } from "react-icons/hi";
 import { IoPeopleOutline, IoTicketOutline } from "react-icons/io5";
 
 interface Props {
-  rolUser: "user" | "admin";
+  rolUser: "user" | "admin" | undefined;
   closeSideMenu: () => void;
-};
+}
+
+const LINKS = [
+  { href: "/admin/products", label: "Productos", Icon: HiOutlineDeviceMobile },
+  { href: "/admin/orders", label: "Ordenes", Icon: IoTicketOutline },
+  { href: "/admin/users", label: "Usuarios", Icon: IoPeopleOutline },
+] as const;
 
 const ViewRolAdmin = ({ rolUser, closeSideMenu }: Props) => {
   return (
     <If condition={rolUser === "admin"}>
-      <Link
-        href="/admin/products"
-        className="flex items-center mt-10 p-2 hover:bg-gray100 rounded transition-all"
-        onClick={() => closeSideMenu()}
-      >
-        <HiOutlineDeviceMobile size={30} />
-        <span className="ml-3 text-xl">Productos</span>
-      </Link>
-
-      <Link
-        href="/admin/orders"
-        className="flex items-center mt-10 p-2 hover:bg-gray100 rounded transition-all"
-        onClick={() => closeSideMenu()}
-      >
-        <IoTicketOutline size={30} />
-        <span className="ml-3 text-xl">Ordenes</span>
-      </Link>
-
-      <Link
-        href="/admin/users"
-        className="flex items-center mt-10 p-2 hover:bg-gray100 rounded transition-all"
-        onClick={() => closeSideMenu()}
-      >
-        <IoPeopleOutline size={30} />
-        <span className="ml-3 text-xl">Usuarios</span>
-      </Link>
+      {LINKS.map(({ href, label, Icon }) => (
+        <Link
+          key={href}
+          href={href}
+          onClick={closeSideMenu}
+          className="mt-10 flex items-center rounded p-2 text-brand-black transition-colors hover:bg-brand-smoke/20 hover:text-brand-orange"
+        >
+          <Icon size={30} />
+          <span className="ml-3 text-xl">{label}</span>
+        </Link>
+      ))}
     </If>
   );
 };
