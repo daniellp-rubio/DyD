@@ -1,89 +1,152 @@
 export const revalidate = 604800;
 
-import { Metadata, ResolvingMetadata } from "next";
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-// Actions
-import { getProductBySlug } from "@/actions";
+import { getProductBySlug, getTopProductSlugs } from "@/actions";
 
-// Components
-import { ProductMobileSlideshow, ProductSlideshow } from "@/components";
+import {
+  Breadcrumbs,
+  ProductMobileSlideshow,
+  ProductSlideshow,
+  ProductTabs,
+  RelatedProducts
+} from "@/components";
 import StockLabel from "@/components/product/stock-label/StockLabel";
 import AddToCart from "./ui/AddToCart";
 
-// Fonts
 import { inter } from "@/config/fonts";
-
-// Utils
 import { formatToCOP } from "@/utils";
 
 interface Params {
-  slug: string
+  slug: string;
 }
 
 interface Props {
-  params: Promise<Params>
-};
+  params: Promise<Params>;
+}
 
-export async function generateMetadata(
-  { params }: Props,
-  // parent: ResolvingMetadata
-): Promise<Metadata> {
-  const slug = (await params).slug;
+export async function generateStaticParams() {
+  const slugs = await getTopProductSlugs(20);
+  return slugs.map(slug => ({ slug }));
+}
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
   const product = await getProductBySlug(slug);
 
-  // const post = await fetch(`https://api.vercel.app/blog/${slug}`).then((res) =>
-  //   res.json()
-  // )
+  if (!product) {
+    return { title: "Producto no encontrado" };
+  }
+
+  const image = product.images[0];
+  const description = product.description.slice(0, 160);
 
   return {
-    title: product?.title ?? "Producto no encontrado",
-    description: product?.description ?? "",
+    title: product.title,
+    description,
+    keywords: product.tags,
+    alternates: {
+      canonical: `/product/${product.slug}`
+    },
     openGraph: {
-      title: product?.title ?? "Producto no encontrado",
-      description: product?.description ?? "",
-      images: [`/products/${product?.images[1]}`]
+      title: product.title,
+      description,
+      type: "website",
+      url: `/product/${product.slug}`,
+      images: image ? [{ url: image, alt: product.title }] : []
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.title,
+      description,
+      images: image ? [image] : []
     }
   };
-};
+}
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
 
-  if(!product) notFound();
+  if (!product) notFound();
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.title,
+    description: product.description,
+    image: product.images,
+    sku: product.id,
+    category: product.category?.name,
+    brand: { "@type": "Brand", name: "DYD Tech" },
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "COP",
+      price: product.price,
+      availability:
+        product.inStock > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      url: `/product/${product.slug}`
+    }
+  };
 
   return (
-    <div className="mt-5 mb-20 grid grid-cols-1 md:grid-cols-3 gap-3">
-      <div className="col-span-1 md:col-span-2">
-        <ProductMobileSlideshow
-          title={product.title}
-          images={product.images}
-          className="block md:hidden"
-        />
+    <article className="mt-5 mb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
-        <ProductSlideshow
-          title={product.title}
-          images={product.images}
-          className="hidden md:block"
-        />
+      <Breadcrumbs
+        className="mb-4"
+        items={[
+          { label: "Inicio", href: "/" },
+          ...(product.category
+            ? [{ label: product.category.name, href: `/category/${product.category.id}` }]
+            : []),
+          { label: product.title }
+        ]}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <section aria-label="Imágenes del producto" className="col-span-1 md:col-span-2">
+          <ProductMobileSlideshow
+            title={product.title}
+            images={product.images}
+            className="block md:hidden"
+          />
+          <ProductSlideshow
+            title={product.title}
+            images={product.images}
+            className="hidden md:block"
+          />
+        </section>
+
+        <section aria-label="Detalles del producto" className="col-span-1 px-5">
+          <StockLabel slug={product.slug} className="mb-2" />
+
+          <h1 className={`${inter.className} antialiased font-bold text-2xl md:text-3xl leading-tight mb-3`}>
+            {product.title}
+          </h1>
+
+          <p className="text-3xl md:text-4xl font-extrabold text-brand-orange mb-5">
+            {formatToCOP(product.price)}
+          </p>
+
+          <AddToCart product={product} />
+        </section>
       </div>
 
-      <div className="col-span-1 px-5">
-        <StockLabel slug={product.slug} />
-        <h1 className={`${inter.className} antialiased font-bold text-xl`}>
-          {product.title}
-        </h1>
-        <p className="text-lg mb-5">{formatToCOP(product.price)}</p>
+      <ProductTabs description={product.description} tags={product.tags} />
 
-        <AddToCart product={product}/>
-
-        <h3 className="font-bold text-sm">Descripción</h3>
-        <p className="font-light">
-          {product.description}
-        </p>
-      </div>
-    </div>
+      {product.category?.id && (
+        <Suspense fallback={null}>
+          <RelatedProducts categoryId={product.category.id} excludeSlug={product.slug} />
+        </Suspense>
+      )}
+    </article>
   );
-};
+}
