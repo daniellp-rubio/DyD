@@ -10,6 +10,12 @@ export const getProductBySlug = async(slug: string) => {
           select: {
             url: true
           }
+        },
+        category: {
+          select: {
+            id: true,
+            name: true
+          }
         }
       },
       where: {
