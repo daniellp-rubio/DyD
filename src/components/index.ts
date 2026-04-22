@@ -1,6 +1,11 @@
 export * from './if/If';
 export * from './security/Turnstile';
 
+export * from './images/ZoomImage';
+
+export * from './product/description/DescriptionProduct';
+export * from './product/description/DescriptionProductMobile';
+
 export * from './product/quantity-selector/QuantitySelector';
 
 export * from './product/slideshow/ProductMobileSlideshow';

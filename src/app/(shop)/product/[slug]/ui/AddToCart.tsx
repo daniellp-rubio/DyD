@@ -9,6 +9,9 @@ import { CartProduct, Product } from "@/interfaces";
 import { useCartStore } from "@/store";
 import { formatToCOP } from "@/utils";
 
+// Utils
+import { fbq } from "@/utils/fbpixel";
+
 interface Props {
   product: Product;
 }

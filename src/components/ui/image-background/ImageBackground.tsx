@@ -7,12 +7,14 @@ interface Props {
 
 export const ImageBackground = ({ src, alt }: Props) => {
   return (
-    <Image
-      src={src}
-      alt={alt}
-      className="w-full object-cover"
-      width={10000}
-      height={10000}
-    />
+    <div className="w-full h-50 relative">
+      <Image
+        src={src}
+        alt={alt}
+        layout="fill"
+        objectFit="cover"
+        priority
+      />
+    </div>
   );
 };
