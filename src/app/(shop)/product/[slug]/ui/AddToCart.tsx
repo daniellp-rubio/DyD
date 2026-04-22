@@ -1,151 +1,131 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { IoCartOutline, IoCheckmarkCircle } from "react-icons/io5";
 
-// Components
-import { If, QuantitySelector } from "@/components";
-import { ViewerCount } from "./ViewerCount";
-import { StarRating } from "./StarRating";
-
-// Interfaces
+import { QuantitySelector } from "@/components";
+import { getStockBySlug } from "@/actions";
 import { CartProduct, Product } from "@/interfaces";
-
-// Store
 import { useCartStore } from "@/store";
+import { formatToCOP } from "@/utils";
 
 // Utils
 import { fbq } from "@/utils/fbpixel";
 
 interface Props {
   product: Product;
-  mode: "normal" | "insersectionObserver";
-};
+}
 
-function getCookie(name: string) {
-  if (typeof document === "undefined") return undefined;
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? decodeURIComponent(match[2]) : undefined;
-};
-
-const AddToCart = ({ product, mode }: Props) => {
-  const addProductToCar = useCartStore(state => state.addProductToCart);
+const AddToCart = ({ product }: Props) => {
+  const addProductToCart = useCartStore(state => state.addProductToCart);
 
   const [quantity, setQuantity] = useState<number>(1);
+  const [stock, setStock] = useState<number | null>(null);
+  const [added, setAdded] = useState(false);
 
-  const addToCart = async () => {
+  useEffect(() => {
+    let active = true;
+    getStockBySlug(product.slug).then(s => {
+      if (active) setStock(s);
+    });
+    return () => { active = false; };
+  }, [product.slug]);
+
+  const isLoading = stock === null;
+  const isOutOfStock = stock === 0;
+  const maxReached = stock !== null && quantity >= stock;
+  const total = product.price * quantity;
+
+  const handleQuantityChanged = (q: number) => {
+    if (stock === null) return setQuantity(q);
+    setQuantity(Math.min(Math.max(1, q), stock));
+  };
+
+  const addToCart = () => {
+    if (isOutOfStock || isLoading) return;
     const cartProduct: CartProduct = {
       id: product.id,
       slug: product.slug,
       title: product.title,
       price: product.price,
-      quantity: quantity,
-      image: product.images[2],
-      contentId: product.contentId,
-      inStock: product.inStock
+      quantity,
+      image: product.images[0]
     };
-
-    addProductToCar(cartProduct);
-
-    function getUUID() {
-      const cryptoObj = typeof window !== "undefined" ? window.crypto : undefined;
-      if (cryptoObj && typeof cryptoObj.randomUUID === "function") {
-        return cryptoObj.randomUUID();
-      }
-      // Fallback for browsers without crypto.randomUUID
-      if (cryptoObj && typeof cryptoObj.getRandomValues === "function") {
-        return ("10000000-1000-4000-8000-100000000000").replace(/[018]/g, c =>
-          (Number(c) ^ cryptoObj.getRandomValues(new Uint8Array(1))[0] & 15 >> (Number(c) / 4)).toString(16)
-        );
-      }
-      // Fallback: simple random string (not a true UUID)
-      return Math.random().toString(36).substring(2, 18);
-    }
-
-    const eventId = getUUID();
-    const url = window.location.href;
-
-    // 🔹 Google Analytics 4
-    (window as any).gtag?.("event", "add_to_cart", {
-      currency: "COP",
-      value: product.price * quantity,
-      items: [
-        {
-          item_id: product.id,
-          item_name: product.title,
-          item_brand: "Mi Marca",
-          price: product.price,
-          quantity: quantity,
-        },
-      ],
-    });
-
-    // 🔹 Meta Pixel
-    fbq("track", "AddToCart", {
-      content_ids: [product.id],
-      content_name: product.title,
-      content_type: "product",
-      value: product.price * quantity,
-      currency: "COP",
-      quantity: quantity,
-    }, {eventID: eventId});
-
-    // 🔹 CAPI (servidor)
-    await fetch("/api/meta/events", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        event_name: "AddToCart",
-        event_id: eventId, // 👈 mismo ID que arriba
-        event_source_url: url,
-        custom_data: {
-          value: product.price * quantity,
-          currency: "COP",
-          content_type: "product",
-          content_ids: [product.contentId],
-          quantity,
-        },
-        fbp: getCookie("_fbp"),
-        fbc: getCookie("_fbc"),
-        // opcional: email, phone, external_id si el usuario está logueado
-      }),
-    });
-
+    addProductToCart(cartProduct);
+    setAdded(true);
     setQuantity(1);
+    setTimeout(() => setAdded(false), 2000);
   };
 
   return (
     <>
-      <If condition={mode === "normal"}>
-        <QuantitySelector
-          quantity={quantity}
-          onQuantityChanged={setQuantity}
-          inStock={product.inStock}
-        />
+      {/* Desktop */}
+      <div className="hidden md:block">
+        <div className="flex items-center justify-between my-4">
+          <span className="text-sm text-brand-smoke">Cantidad</span>
+          <QuantitySelector quantity={quantity} onQuantityChanged={handleQuantityChanged} />
+        </div>
+
+        {quantity > 1 && !isOutOfStock && (
+          <p className="text-sm text-brand-smoke mb-2">
+            Total: <span className="font-bold text-brand-black">{formatToCOP(total)}</span>
+          </p>
+        )}
+
+        {maxReached && !isOutOfStock && (
+          <p className="text-xs text-brand-orange mb-2">Has alcanzado el máximo disponible</p>
+        )}
 
         <button
-          className="btn-primary my-5 py-1 px-3 text-[0.79rem] animate-wiggle"
+          type="button"
+          aria-label={isOutOfStock ? "Producto agotado" : "Agregar al carrito"}
+          disabled={isOutOfStock || isLoading}
+          className={`${isOutOfStock || isLoading ? "btn-disabled" : "btn-primary"} w-full my-2 flex items-center justify-center gap-2`}
           onClick={addToCart}
         >
-          Agregar al carrito
+          {added ? (
+            <>
+              <IoCheckmarkCircle size={20} /> Agregado
+            </>
+          ) : isOutOfStock ? (
+            "Agotado"
+          ) : (
+            <>
+              <IoCartOutline size={20} /> Agregar al carrito
+            </>
+          )}
         </button>
-      </If>
+      </div>
 
-      <If condition={mode === "insersectionObserver"}>
-        <div className="w-full h-full flex items-center justify-center gap-4 my-5">
-          <QuantitySelector
-            quantity={quantity}
-            onQuantityChanged={setQuantity}
-            inStock={product.inStock}
-          />
-
-          <button
-            className="btn-primary py-1 px-3 text-[0.79rem] border-2"
-            onClick={addToCart}
-          >
-            Agregar al carrito
-          </button>
-        </div>
-      </If>
+      {/* Mobile sticky CTA */}
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-brand-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
+        <QuantitySelector
+          quantity={quantity}
+          onQuantityChanged={handleQuantityChanged}
+          compact
+        />
+        <button
+          type="button"
+          aria-label={isOutOfStock ? "Producto agotado" : "Agregar al carrito"}
+          disabled={isOutOfStock || isLoading}
+          className={`${isOutOfStock || isLoading ? "btn-disabled" : "btn-primary"} flex-1 flex items-center justify-center gap-2 py-2.5 px-3 text-sm`}
+          onClick={addToCart}
+        >
+          {added ? (
+            <>
+              <IoCheckmarkCircle size={18} /> Agregado
+            </>
+          ) : isOutOfStock ? (
+            "Agotado"
+          ) : (
+            <>
+              <IoCartOutline size={18} />
+              <span className="truncate">Agregar</span>
+            </>
+          )}
+        </button>
+      </div>
+      <div className="md:hidden h-20" aria-hidden="true" />
     </>
   );
 };

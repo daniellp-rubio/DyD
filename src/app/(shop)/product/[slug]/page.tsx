@@ -2,14 +2,17 @@ export const revalidate = 604800;
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-// Actions
-import { getPaginatedProductsWithImages, getProductBySlug } from "@/actions";
+import { getProductBySlug, getTopProductSlugs } from "@/actions";
 
-// Components
-import { DescriptionProductMobile } from "@/components/product/description/DescriptionProductMobile";
-import { DescriptionProduct } from "@/components/product/description/DescriptionProduct";
-import { ProductMobileSlideshow, ProductSlideshow } from "@/components";
+import {
+  Breadcrumbs,
+  ProductMobileSlideshow,
+  ProductSlideshow,
+  ProductTabs,
+  RelatedProducts
+} from "@/components";
 import StockLabel from "@/components/product/stock-label/StockLabel";
 import { ProductCard } from "@/components/product/card/Card";
 import { ProductViewTracker } from "./ui/ProductViewTracker";
@@ -18,156 +21,138 @@ import { StarRating } from "./ui/StarRating";
 import ButtonSlide from "./ui/ButtonSlide";
 import AddToCart from "./ui/AddToCart";
 
-// Icons
-import { FaTruck, FaShieldAlt, FaCheckCircle } from "react-icons/fa";
-
-// Fonts
 import { inter } from "@/config/fonts";
-
-// Utils
 import { formatToCOP } from "@/utils";
 
 interface Params {
-  slug: string
+  slug: string;
 }
 
 interface Props {
-  params: Promise<Params>
-};
+  params: Promise<Params>;
+}
 
-export async function generateMetadata(
-  { params }: Props,
-  // parent: ResolvingMetadata
-): Promise<Metadata> {
-  const slug = (await params).slug;
+export async function generateStaticParams() {
+  const slugs = await getTopProductSlugs(20);
+  return slugs.map(slug => ({ slug }));
+}
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
   const product = await getProductBySlug(slug);
 
-  // const post = await fetch(`https://api.vercel.app/blog/${slug}`).then((res) =>
-  //   res.json()
-  // )
+  if (!product) {
+    return { title: "Producto no encontrado" };
+  }
+
+  const image = product.images[0];
+  const description = product.description.slice(0, 160);
 
   return {
-    title: product?.title ?? "Producto no encontrado",
-    description: product?.description ?? "",
+    title: product.title,
+    description,
+    keywords: product.tags,
+    alternates: {
+      canonical: `/product/${product.slug}`
+    },
     openGraph: {
-      title: product?.title ?? "Producto no encontrado",
-      description: product?.description ?? "",
-      images: [`/products/${product?.images[1]}`]
+      title: product.title,
+      description,
+      type: "website",
+      url: `/product/${product.slug}`,
+      images: image ? [{ url: image, alt: product.title }] : []
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.title,
+      description,
+      images: image ? [image] : []
     }
   };
-};
+}
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   const { products } = await getPaginatedProductsWithImages({ page: 1 });
 
-  if(!product) notFound();
+  if (!product) notFound();
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.title,
+    description: product.description,
+    image: product.images,
+    sku: product.id,
+    category: product.category?.name,
+    brand: { "@type": "Brand", name: "DYD Tech" },
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "COP",
+      price: product.price,
+      availability:
+        product.inStock > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      url: `/product/${product.slug}`
+    }
+  };
 
   return (
-    <>
-      <div className="mt-5 mb-20 grid grid-cols-1 md:grid-cols-6 gap-3">
-        <ProductViewTracker product={product} />
+    <article className="mt-5 mb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
-        <div className="col-span-1 md:col-span-3">
+      <Breadcrumbs
+        className="mb-4"
+        items={[
+          { label: "Inicio", href: "/" },
+          ...(product.category
+            ? [{ label: product.category.name, href: `/category/${product.category.id}` }]
+            : []),
+          { label: product.title }
+        ]}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <section aria-label="Imágenes del producto" className="col-span-1 md:col-span-2">
           <ProductMobileSlideshow
             title={product.title}
-            images={product.images.slice(2)}
+            images={product.images}
             className="block md:hidden"
           />
-
           <ProductSlideshow
             title={product.title}
-            images={product.images.slice(2)}
+            images={product.images}
             className="hidden md:block"
           />
+        </section>
 
-          <ButtonSlide />
-        </div>
+        <section aria-label="Detalles del producto" className="col-span-1 px-5">
+          <StockLabel slug={product.slug} className="mb-2" />
 
-        <div className="col-span-3 px-5">
-          <div className="relative inline-block">
-            {/* Etiqueta con flecha */}
-            <div className="bg-palet-orange text-white font-semibold px-4 py-2 rounded-l-md relative mb-5 top-0 left-[-0.2rem]">
-              <div className="absolute top-0 right-[-15px] w-0 h-0 border-t-[20px] border-t-transparent border-l-[15px] border-l-palet-orange border-b-[20px] border-b-transparent"></div>
-              <div className="flex items-center gap-2">
-                <FaCheckCircle />
-                Producto recomendado
-              </div>
-            </div>
-          </div>
-
-          <StockLabel slug={product.slug} />
-          <h1 className={`${inter.className} antialiased font-bold text-lg`}>
+          <h1 className={`${inter.className} antialiased font-bold text-2xl md:text-3xl leading-tight mb-3`}>
             {product.title}
           </h1>
 
-          <div className="flex items-center gap-2 mb-5">
-            {/* Precio actual */}
-            <span className="text-palet-orange-dyd font-bold text-lg">
-              {formatToCOP(product.price)}
-            </span>
-            {/* Precio anterior tachado */}
-            <span className="text-gray-500 line-through text-md">
-              {formatToCOP(product.priceInOffer)}
-            </span>
-          </div>
+          <p className="text-3xl md:text-4xl font-extrabold text-brand-orange mb-5">
+            {formatToCOP(product.price)}
+          </p>
 
-          <StarRating value={4.8} totalRatings={18} readOnly />
-          <ViewerCount min={3} max={8} refreshMs={10000} />
-          <AddToCart product={product} mode="normal" />
-
-          <div className="text-white text-sm space-y-2">
-            <div className="flex items-center gap-2">
-              <FaTruck className="text-blue-400 text-lg" />
-              <span>
-                Entrega estimada:{" "}
-                <strong>1-3 días</strong> (Colombia),{" "}
-                <strong>Envío Flash Contraentrega</strong> (Medellín)
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <FaShieldAlt className="text-green-400 text-lg" />
-              <span><strong>Compra con seguridad</strong>, calidad, confianza y garantía</span>
-            </div>
-          </div>
-        </div>
-
+          <AddToCart product={product} />
+        </section>
       </div>
 
-      <div id="product-description" className="col-span-6 md:px-25 mt-5">
-        <h3 className="font-bold text-[1.25rem]">Descripción</h3>
-        <DescriptionProductMobile
-          title={product.title}
-          descriptionImages={product.descriptionImagesMobile}
-          className="block md:hidden"
-        />
+      <ProductTabs description={product.description} tags={product.tags} />
 
-        <DescriptionProduct
-          title={product.title}
-          descriptionImages={product.descriptionImages}
-          className="hidden md:block"
-        />
-      </div>
-
-      <div className="col-span-6 md:px-25 mt-5">
-        <h3 className="font-bold text-[1.25rem]">Nuestros clientes también compraron</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
-          {products
-            .filter(item => item.tags.includes("airpods") && item.id !== product.id)
-            .slice(0, 4)
-            .map(item => (
-              <ProductCard
-                key={item.id}
-                product={item}
-              />
-          ))}
-        </div>
-      </div>
-
-      {/* <InsersectionObserver product={product} /> */}
-    </>
+      {product.category?.id && (
+        <Suspense fallback={null}>
+          <RelatedProducts categoryId={product.category.id} excludeSlug={product.slug} />
+        </Suspense>
+      )}
+    </article>
   );
-};
+}

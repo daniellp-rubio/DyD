@@ -6,6 +6,7 @@ export * from "./address/delete-user-address";
 export * from "./auth/login";
 export * from "./auth/logout";
 export * from "./auth/register";
+export * from "./auth/verify-email";
 
 export * from "./categories/get-categories";
 
@@ -22,6 +23,5 @@ export * from "./products/product-pagination";
 export * from "./products/create-update-product";
 export * from "./products/get-product-by-slug";
 export * from "./products/get-stock-by-slug";
-
-export * from "./users/change-user-role";
-export * from "./users/users-paginated-users";
+export * from "./products/get-related-products";
+export * from "./products/get-top-product-slugs";

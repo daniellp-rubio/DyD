@@ -1,22 +1,39 @@
 export const revalidate = 60;
 
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-// Components
-import { AnimateMoveLeft } from "@/components/ui/animate-move-left/AnimateMoveLeft";
-import { Notification } from "@/components/ui/notification/Notification";
-
-// Actions
 import { getPaginatedProductsWithImages } from "@/actions";
 
-// Components
-import { MainSection, ProductGrid, PurchasePopup, TitleCenter } from "@/components";
+import {
+  HeroSection,
+  TrustBadges,
+  FeaturedCategories,
+  BestSellers,
+  Spotlight,
+  ProductGrid,
+  Testimonials,
+  Newsletter,
+} from "@/components";
+
+export const metadata: Metadata = {
+  title: "DYD Tech | Gadgets y Audio Premium en Colombia",
+  description:
+    "Descubre auriculares, AirPods, gaming y smart tech de alta fidelidad. Envío express en Colombia, pagos seguros y garantía extendida.",
+  keywords: ["gadgets", "audio premium", "AirPods", "auriculares", "tecnología", "Colombia"],
+  openGraph: {
+    title: "DYD Tech | Gadgets y Audio Premium",
+    description: "El verdadero estándar del audio premium. Envío express a todo Colombia.",
+    type: "website",
+    locale: "es_CO",
+  },
+};
 
 interface Props {
   searchParams?: Promise<{
-    page?: string
+    page?: string;
   }>;
-};
+}
 
 export default async function Home({ searchParams }: Props) {
   const params = await searchParams;
@@ -24,93 +41,77 @@ export default async function Home({ searchParams }: Props) {
 
   const { products } = await getPaginatedProductsWithImages({ page });
 
-  if(products.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-96">
-        <h2 className="text-2xl font-bold mb-4">No hay productos disponibles</h2>
-        <p className="text-gray-500">Vuelve más tarde o revisa otra categoría.</p>
-      </div>
-    );
+  if (products.length === 0) {
+    redirect("/");
   }
 
+  const bestSellers = products.slice(0, 8);
+
+  const organizationLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "DYD Tech",
+    url: "https://dydtech.com",
+    logo: "/logo_compact_(640x640px).png",
+    sameAs: [],
+  };
+
+  const itemListLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: products.map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: p.title,
+      url: `/product/${p.slug}`,
+      image: p.images[0],
+    })),
+  };
+
   return (
-    <div>
-      <MainSection />
+    <div className="flex flex-col w-full bg-brand-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }}
+      />
 
-      <div>
-        <TitleCenter
-          title="AirPods"
-          subtitle="Conoce todas las generaciones."
-          className="mb-2"
-        />
+      <HeroSection />
+      <TrustBadges />
+      <FeaturedCategories />
+      <BestSellers products={bestSellers} />
 
-        <div
-          className="mb-25"
-        >
-          <AnimateMoveLeft
-            images={[
-              {
-                key: "1",
-                src: "https://res.cloudinary.com/dtttwxbgr/image/upload/v1752350820/AUDIFONOS_DE_SEGUNDA_GENERACI%C3%93N_P%C3%81GINA_3125x3125px_200_x_200_px_peut2s.webp",
-                alt: "AIRPODS DE PRIMERA GENERACIÓN"
-              },
-              {
-                key: "2",
-                src: "https://res.cloudinary.com/dtttwxbgr/image/upload/v1752350772/AUDIFONOS_PRO_DE_SEGUNDA_GENERACI%C3%93N_P%C3%81GINA_200x200px_x2ftne.webp",
-                alt: "AIRPODS PRO DE SEGUNDA GENERACIÓN"
-              },
-              {
-                key: "3",
-                src: "https://res.cloudinary.com/dtttwxbgr/image/upload/v1752350777/AUDIFONOS_PRO_DE_SEGUNDA_GENERACI%C3%93N_CON_PANTALLA_P%C3%81GINA_200x200px_icywke.webp",
-                alt: "AIRPODS DE SEGUNDA GENERACIÓN CON PANTALLA"
-              },
-              {
-                key: "4",
-                src: "https://res.cloudinary.com/dtttwxbgr/image/upload/v1752350773/AUDIFONOS_DE_TERCERA_GENERACI%C3%93N_P%C3%81GINA_200x200px_ut2dka.webp",
-                alt: "AIRPODS DE TERCERA GENERACIÓN"
-              },
-              {
-                key: "5",
-                src: "https://res.cloudinary.com/dtttwxbgr/image/upload/v1752350772/AUDIFONOS_DE_CUARTA_GENERACI%C3%93N_P%C3%81GINA_200x200px_kkrivz.webp",
-                alt: "AIRPODS DE CUARTA GENERACIÓN"
-              },
-            ]}
-          />
+      <Spotlight
+        title="Siente el ecosistema."
+        subtitle="Conoce todas las generaciones de AirPods."
+        image="https://res.cloudinary.com/dtttwxbgr/image/upload/v1748839317/airpods_-_Copy_bqx4t1.png"
+        alt="AirPods"
+        ctaText="Ver AirPods"
+        ctaHref="#catalogo"
+        variant="dark"
+      />
+
+      <section id="catalogo" className="max-w-[1440px] w-full mx-auto px-6 sm:px-10 py-16 scroll-mt-20">
+        <div className="flex flex-col sm:flex-row items-baseline justify-between mb-10 w-full border-b border-gray-200 pb-4">
+          <div>
+            <span className="text-brand-orange text-sm font-bold uppercase tracking-wider">
+              Todos los productos
+            </span>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-brand-black mt-1">
+              Catálogo Completo
+            </h2>
+          </div>
+          <span className="text-brand-smoke font-medium">{products.length} Productos</span>
         </div>
 
-        <ProductGrid
-          products={products}
-          tag="airpods"
-        />
-      </div>
+        <ProductGrid products={products} />
+      </section>
 
-      <div className="mt-10">
-        <TitleCenter
-          title="Apple Watch"
-          subtitle="Conoce todos los Apple Watch."
-          className="mb-2"
-        />
-
-        <ProductGrid
-          products={products}
-          tag="applewatch"
-        />
-      </div>
-
-      <div className="mt-10">
-        <TitleCenter
-          title="Samsung Galaxy Buds"
-          subtitle="Conoce todos los Samsung Galaxy Buds."
-          className="mb-2"
-        />
-
-        <ProductGrid
-          products={products}
-          tag="galaxybuds"
-        />
-      </div>
-
-      <Notification timeout={10000}/>
+      <Testimonials />
+      <Newsletter />
     </div>
   );
-};
+}
