@@ -38,8 +38,9 @@ model Product {
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId String
 
-  ProductImage ProductImage[]
-  OrderItem    OrderItem[]
+  ProductImage   ProductImage[]
+  OrderItem      OrderItem[]
+  ProductRatings ProductRatings[]
 }
 
 model ProductImage {
@@ -65,6 +66,7 @@ model User {
 
   Order             Order[]
   VerificationToken VerificationToken[]
+  ProductRatings    ProductRatings[]    @relation("UserProductRating")
 }
 
 model VerificationToken {
@@ -139,4 +141,18 @@ model OrderAddress {
 
   order   Order  @relation(fields: [orderId], references: [id])
   orderId String @unique
+}
+
+model ProductRatings {
+  id      Int     @id @default(autoincrement())
+  rating  Int     @default(0)
+  comment String?
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+
+  user   User   @relation("UserProductRating", fields: [userId], references: [id])
+  userId String
+
+  @@unique([userId, productId])
 }
