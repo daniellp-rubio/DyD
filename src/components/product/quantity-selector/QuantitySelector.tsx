@@ -14,6 +14,7 @@ export const QuantitySelector = ({ quantity, onQuantityChanged, compact = false 
     ? "w-10 mx-1 text-center rounded bg-brand-gray text-brand-black font-semibold"
     : "w-16 mx-2 py-1 text-center rounded bg-brand-gray text-brand-black font-semibold";
 
+export const QuantitySelector = ({ quantity, inStock, onQuantityChanged }: Props) => {
   return (
     <div className="flex items-center" role="group" aria-label="Selector de cantidad">
       <button

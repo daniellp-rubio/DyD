@@ -20,6 +20,8 @@ function ProductsInCart() {
   const updateProductQuantity = useCartStore(state => state.updateProductQuantity);
   const deleteProduct = useCartStore(state => state.deleteProduct);
 
+  console.log("productsInCart", productsInCart);
+
   useEffect(() => {
     setLoaded(true);
   }, [])
@@ -60,6 +62,7 @@ function ProductsInCart() {
             <QuantitySelector
               quantity={product.quantity}
               onQuantityChanged={(value) => updateProductQuantity(product, value)}
+              inStock={product.inStock}
             />
 
               <button

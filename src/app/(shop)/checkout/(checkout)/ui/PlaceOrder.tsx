@@ -84,7 +84,7 @@ const PlaceOrder = () => {
 
       <div className="mt-5 mb-2 w-full">
         <span className="text-sx">
-          Al ordenar aceptas nuestros <a href="#" className="underline">términos y condiciones</a> y <a href="#" className="underline">pólitica de privacidad</a>
+          Al ordenar aceptas nuestros <a href="/termsandconditions" className="underline">términos y condiciones</a> y <a href="/termsandconditions" className="underline">pólitica de privacidad</a>
         </span>
 
         <p className="text-red-500">{errorMessage}</p>

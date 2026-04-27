@@ -14,6 +14,11 @@ import {
   RelatedProducts
 } from "@/components";
 import StockLabel from "@/components/product/stock-label/StockLabel";
+import { ProductCard } from "@/components/product/card/Card";
+import { ProductViewTracker } from "./ui/ProductViewTracker";
+import { ViewerCount } from "./ui/ViewerCount";
+import { StarRating } from "./ui/StarRating";
+import ButtonSlide from "./ui/ButtonSlide";
 import AddToCart from "./ui/AddToCart";
 
 import { inter } from "@/config/fonts";
@@ -69,6 +74,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
+  const { products } = await getPaginatedProductsWithImages({ page: 1 });
 
   if (!product) notFound();
 
