@@ -13,11 +13,19 @@
 }
 
 @theme {
-  --color-palet-orange: #FFA500;
-  --color-palet-orange-dark: #F09B00;
-  --color-palet-hover-orange: #FFAC13;
-  --color-palet-black: #1C1C1C;
-  --color-palet-found-black: #2C2C2C;
+  --color-brand-orange: #FF5722;
+  --color-brand-black: #1C1C1C;
+  --color-brand-white: #FFFFFF;
+  --color-brand-gray: #F5F5F5;
+  --color-brand-smoke: #757575;
+  --color-brand-blue: #0066CC;
+
+  /* Aliases for legacy support to prevent breakage in other pages */
+  --color-palet-orange: var(--color-brand-orange);
+  --color-palet-orange-dark: #E64A19;
+  --color-palet-hover-orange: #E64A19;
+  --color-palet-black: var(--color-brand-black);
+  --color-palet-found-black: #121212;
 }
 
 /*
@@ -30,8 +38,9 @@
 
 body {
   background: var(--background);
-  color: var(--foreground);
+  color: var(--color-brand-black);
   font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
 }
 
 @keyframes fadeIn {
@@ -54,14 +63,22 @@ body {
   animation-name: fadeIn;
 }
 
+/* Brand Buttons */
 .btn-primary {
-  @apply bg-palet-orange hover:bg-palet-hover-orange text-white py-2 px-4 rounded transition-all cursor-pointer;
+  @apply bg-brand-orange text-brand-white py-3 px-6 rounded-lg font-bold transition-all duration-300 shadow-sm cursor-pointer border border-transparent;
+}
+.btn-primary:hover {
+  background-color: #E64A19;
+  @apply shadow-lg transform -translate-y-0.5;
 }
 
 .btn-secondary {
-  @apply bg-gray-200 hover:bg-gray-300 text-black py-2 px-4 rounded transition-all cursor-pointer;
+  @apply bg-brand-gray text-brand-black py-3 px-6 rounded-lg font-bold transition-all duration-300 cursor-pointer border border-slate-200;
+}
+.btn-secondary:hover {
+  @apply bg-slate-200 shadow-md;
 }
 
 .btn-disabled {
-  @apply bg-palet-orange-dark text-white py-2 px-4 rounded transition-all cursor-pointer;
+  @apply bg-brand-smoke text-brand-white opacity-70 py-3 px-6 rounded-lg font-bold cursor-not-allowed;
 }
