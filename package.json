@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
-    "@prisma/client": "^6.12.0",
+    "@prisma/client": "6.10.1",
     "@sendgrid/mail": "^8.1.5",
     "autoprefixer": "^10.4.21",
     "bcryptjs": "^3.0.2",
@@ -41,7 +41,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
-    "prisma": "^6.9.0",
+    "prisma": "6.10.1",
     "tailwindcss": "^4.1.8",
     "ts-node": "^10.9.2",
     "typescript": "^5"
