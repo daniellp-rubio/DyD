@@ -74,14 +74,14 @@ App en `http://localhost:3000`.
 
 ## Scripts
 
-| Script | Acción |
-|---|---|
-| `npm run dev` | Servidor de desarrollo |
-| `npm run build` | Migra Prisma + build producción |
-| `npm start` | Servidor producción |
-| `npm run lint` | Lint |
-| `npm run seed` | Poblar base de datos |
-| `npm run prisma:deploy` | Aplicar migraciones |
+|         Script          |             Acción              |
+|-------------------------|---------------------------------|
+| `npm run dev`           |      Servidor de desarrollo     |
+| `npm run build`         | Migra Prisma + build producción |
+| `npm start`             |       Servidor producción       |
+| `npm run lint`          |              Lint               |
+| `npm run seed`          |      Poblar base de datos       |
+| `npm run prisma:deploy` |      Aplicar migraciones        |
 
 ## Estructura
 
