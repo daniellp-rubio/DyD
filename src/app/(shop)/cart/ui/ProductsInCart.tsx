@@ -62,7 +62,7 @@ function ProductsInCart() {
             <QuantitySelector
               quantity={product.quantity}
               onQuantityChanged={(value) => updateProductQuantity(product, value)}
-              inStock={product.inStock}
+              maxQuantity={product.inStock}
             />
 
               <button
