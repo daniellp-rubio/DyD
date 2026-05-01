@@ -39,12 +39,39 @@ export const authConfig: NextAuthConfig = {
       if (isProtected) return isLoggedIn;
       return true;
     },
-    jwt({ token, user }) {
-      if (user) token.data = user;
+    async jwt({ token, user, trigger }) {
+      if (user) {
+        token.id = user.id!;
+        token.name = user.name!;
+        token.email = user.email!;
+        token.role = user.role;
+        token.emailVerified = user.emailVerified ?? null;
+        token.image = user.image ?? null;
+        return token;
+      }
+
+      if (trigger === 'update' && typeof token.id === 'string' && token.id) {
+        const fresh = await prisma.user.findUnique({
+          where: { id: token.id },
+          select: { role: true, emailVerified: true, name: true, image: true },
+        });
+        if (fresh) {
+          token.role = fresh.role;
+          token.emailVerified = fresh.emailVerified;
+          token.name = fresh.name;
+          token.image = fresh.image;
+        }
+      }
+
       return token;
     },
     session({ session, token }) {
-      session.user = token.data as any;
+      session.user.id = token.id;
+      session.user.name = token.name;
+      session.user.email = token.email;
+      session.user.role = token.role;
+      session.user.emailVerified = token.emailVerified ?? null;
+      session.user.image = token.image ?? null;
       return session;
     },
   },
@@ -54,7 +81,8 @@ export const authConfig: NextAuthConfig = {
         const parsed = credentialsSchema.safeParse(credentials);
         if (!parsed.success) return null;
 
-        const { email, password } = parsed.data;
+        const email: string = parsed.data.email;
+        const password: string = parsed.data.password;
         const user = await prisma.user.findUnique({ where: { email } });
 
         if (user?.lockedUntil && user.lockedUntil > new Date()) {
@@ -91,8 +119,14 @@ export const authConfig: NextAuthConfig = {
           });
         }
 
-        const { password: _pw, failedAttempts: _fa, lockedUntil: _lu, ...rest } = user;
-        return rest;
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          emailVerified: user.emailVerified,
+          image: user.image,
+        };
       },
     }),
   ],
