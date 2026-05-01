@@ -1,136 +1,118 @@
 "use server";
 
+import { z } from "zod";
 import { auth } from "@/auth-config";
 import { Address } from "@/interfaces";
 import prisma from "@/lib/prisma";
+import { Logger } from "@/lib/logger";
+
+const productInputSchema = z.object({
+  productId: z.string().uuid(),
+  quantity: z.number().int().positive().max(100),
+});
+
+const addressSchema = z.object({
+  firstName: z.string().trim().min(1).max(80),
+  lastName: z.string().trim().min(1).max(80),
+  address: z.string().trim().min(1).max(160),
+  address2: z.string().trim().max(160).optional(),
+  postalCode: z.string().trim().min(1).max(20),
+  city: z.string().trim().min(1).max(80),
+  phone: z.string().trim().min(5).max(30),
+});
 
 interface ProductToOrder {
   productId: string;
   quantity: number;
-};
+}
 
-export const placeOrder = async(productIds: ProductToOrder[], address: Address) => {
+export const placeOrder = async (productIds: ProductToOrder[], address: Address) => {
   const session = await auth();
   const userId = session?.user.id;
 
-  if (!userId) {
-    return {
-      ok: false,
-      message: "No hay sesión de usuario"
-    };
-  };
+  if (!userId) return { ok: false, message: "No hay sesión de usuario" };
+
+  const itemsParsed = z.array(productInputSchema).min(1).max(50).safeParse(productIds);
+  if (!itemsParsed.success) return { ok: false, message: "Productos inválidos" };
+
+  const addressParsed = addressSchema.safeParse(address);
+  if (!addressParsed.success) return { ok: false, message: "Dirección inválida" };
+
+  const items = itemsParsed.data;
+  const cleanAddress = addressParsed.data;
 
   const products = await prisma.product.findMany({
-    where: {
-      id: {
-        in: productIds.map(p => p.productId)
-      }
-    }
+    where: { id: { in: items.map((p) => p.productId) } },
+    select: { id: true, price: true, title: true },
   });
 
-  const itemsInOrder = productIds.reduce((count, p) => count + p.quantity, 0);
+  if (products.length !== items.length) {
+    return { ok: false, message: "Uno o más productos no existen" };
+  }
 
-  const { subTotal, total } = productIds.reduce((totals, item) => {
-    const productQuantity = item.quantity;
-    const product = products.find(product => product.id === item.productId);
-
-    if(!product) throw new Error(`${item.productId} no existe - 500`);
-
-    const subTotal = product.price * productQuantity;
-
-    totals.subTotal += subTotal;
-    totals.total += subTotal * 1;
-
-    return totals;
-  }, {subTotal: 0, total:0});
+  const itemsInOrder = items.reduce((c, p) => c + p.quantity, 0);
+  let subTotal = 0;
+  for (const item of items) {
+    const product = products.find((p) => p.id === item.productId)!;
+    subTotal += product.price * item.quantity;
+  }
+  const total = subTotal;
 
   try {
-    const prismaTx = await prisma.$transaction(async(tx) => {
-      const updatedProductsPromises = products.map((product) => {
-        const productQuantity = productIds.filter(
-          p => p.productId === product.id
-        ).reduce((acc, item) => item.quantity + acc, 0);
-
-        if (productQuantity === 0) {
-          throw new Error(`${product.id} no tiene cantidad definida`);
-        };
-
-        return tx.product.update({
-          where: { id: product.id },
-          data: {
-            inStock: {
-              decrement: productQuantity
-            }
-          }
+    const result = await prisma.$transaction(async (tx) => {
+      // Atomic stock decrement: only succeeds if inStock >= quantity
+      for (const item of items) {
+        const updated = await tx.product.updateMany({
+          where: { id: item.productId, inStock: { gte: item.quantity } },
+          data: { inStock: { decrement: item.quantity } },
         });
-      });
-
-      const updatedProducts = await Promise.all(updatedProductsPromises);
-
-      console.log("updatedProducts", updatedProducts);
-      updatedProducts.forEach(product => {
-        console.log("product", product);
-        if (product.inStock < 0) {
-          throw new Error(`${product.title} no tiene inventario suficiente`)
-        };
-      });
+        if (updated.count !== 1) {
+          throw new Error(`Stock insuficiente para ${item.productId}`);
+        }
+      }
 
       const order = await tx.order.create({
         data: {
-          userId: userId,
-          itemsInOrder: itemsInOrder,
+          userId,
+          itemsInOrder,
           subTotal,
           total,
-
           OrderItem: {
             createMany: {
-              data: productIds.map(p => ({
+              data: items.map((p) => ({
                 quantity: p.quantity,
                 productId: p.productId,
-                price: products.find(product => product.id === p.productId)?.price ?? 0
-              }))
-            }
-          }
-        }
+                price: products.find((pr) => pr.id === p.productId)!.price,
+              })),
+            },
+          },
+          OrderAddress: {
+            create: {
+              firstName: cleanAddress.firstName,
+              lastName: cleanAddress.lastName,
+              address: cleanAddress.address,
+              address2: cleanAddress.address2,
+              postalCode: cleanAddress.postalCode,
+              city: cleanAddress.city,
+              phone: cleanAddress.phone,
+            },
+          },
+        },
       });
 
-      const orderAddress = await tx.orderAddress.create({
-        data: {
-          firstName: address.firstName,
-          lastName: address.lastName,
-          address: address.address,
-          address2: address.address2,
-          postalCode: address.postalCode,
-          city: address.city,
-          phone: address.phone,
-
-          orderId: order.id,
-        }
-      });
-
-      return {
-        order,
-        updatedProducts: updatedProducts,
-        orderAddress: orderAddress
-      }
+      return { order };
     });
 
-    return {
-      ok: true,
-      order: prismaTx.order,
-      prismaTx: prismaTx
-    }
+    return { ok: true, order: result.order };
   } catch (err) {
-  if (err instanceof Error) {
+    Logger.error({
+      title: "Place Order Failed",
+      message: "Error en placeOrder",
+      error: err,
+    });
     return {
       ok: false,
-      message: err.message,
+      message: err instanceof Error ? err.message : "Ocurrió un error desconocido",
     };
   }
-
-  return {
-    ok: false,
-    message: "Ocurrió un error desconocido",
-  };
-}
 };
