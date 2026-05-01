@@ -1,21 +1,17 @@
 "use server";
 
-import { auth } from "@/auth-config";
-
 import prisma from "@/lib/prisma";
+import { Logger } from "@/lib/logger";
 
-export const getCategories = async() => {
-
+export const getCategories = async () => {
   try {
-    const categories = await prisma.category.findMany({
-      orderBy: {
-        name: "asc"
-      }
-    });
-
-    return categories;
+    return await prisma.category.findMany({ orderBy: { name: "asc" } });
   } catch (error) {
-    console.log(error);
+    Logger.error({
+      title: "Get Categories Failed",
+      message: "No se pudo cargar categorías",
+      error,
+    });
     return [];
   }
 };
