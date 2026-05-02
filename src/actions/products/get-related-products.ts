@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { Logger } from "@/lib/logger";
 
 interface Options {
   categoryId: string;
@@ -13,23 +14,24 @@ export const getRelatedProducts = async ({ categoryId, excludeSlug, take = 4 }: 
     const products = await prisma.product.findMany({
       where: {
         categoryId,
-        slug: { not: excludeSlug }
+        slug: { not: excludeSlug },
       },
       include: {
-        ProductImage: {
-          take: 2,
-          select: { url: true }
-        }
+        ProductImage: { take: 2, select: { url: true } },
       },
-      take
+      take,
     });
 
-    return products.map(p => ({
+    return products.map((p) => ({
       ...p,
-      images: p.ProductImage.map(i => i.url)
+      images: p.ProductImage.map((i) => i.url),
     }));
   } catch (error) {
-    console.log(error);
+    Logger.error({
+      title: "Get Related Products Failed",
+      message: "No se pudieron cargar productos relacionados",
+      error,
+    });
     return [];
   }
 };

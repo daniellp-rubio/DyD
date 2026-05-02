@@ -1,84 +1,70 @@
 "use server";
 
 import { z } from "zod";
-import prisma from "@/lib/prisma";
-import { Product } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { Product } from "@prisma/client";
+
+import { auth } from "@/auth-config";
+import prisma from "@/lib/prisma";
+import { Logger } from "@/lib/logger";
 
 const productSchema = z.object({
   id: z.string().uuid().optional().nullable(),
-  title: z.string().min(3).max(255),
-  slug: z.string().min(3).max(255),
-  description: z.string(),
-  price: z.coerce.number().min(0).transform(val => Number(val.toFixed(2))),
-  inStock: z.coerce.number().min(0).transform(val => Number(val.toFixed(0))),
-  position: z.coerce.number().min(0),
+  title: z.string().trim().min(3).max(255),
+  slug: z.string().trim().min(3).max(255),
+  description: z.string().trim().min(1).max(5000),
+  price: z.coerce.number().min(0).transform((v) => Number(v.toFixed(2))),
+  inStock: z.coerce.number().int().min(0),
+  position: z.coerce.number().int().min(0),
   categoryId: z.string().uuid(),
-  tags: z.string()
+  tags: z.string().max(1000),
 });
 
-export const createUpdateProduct = async(formData: FormData) => {
+export const createUpdateProduct = async (formData: FormData) => {
+  const session = await auth();
+  if (session?.user.role !== "admin") {
+    return { ok: false, message: "No autorizado" } as const;
+  }
+
   const data = Object.fromEntries(formData);
-  const productParsed = productSchema.safeParse(data);
+  const parsed = productSchema.safeParse(data);
+  if (!parsed.success) {
+    return { ok: false, message: "Datos inválidos" } as const;
+  }
 
-  if (!productParsed.success) {
-    console.log(productParsed.error);
-    return { ok: false };
-  };
+  const product = parsed.data;
+  product.slug = product.slug.toLowerCase().replace(/\s+/g, "-").trim();
 
-  const product = productParsed.data;
-  product.slug = product.slug.toLowerCase().replace(/ /g, "-").trim();
-
-  const { id, ...rest } = product;
-
+  const { id, tags, ...rest } = product;
+  const tagsArray = tags
+    .split(",")
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean);
 
   try {
-    const prismaTx = await prisma.$transaction(async(tx) => {
-      let product: Product;
-      const tagsArray = rest.tags.split(",").map(tag => tag.trim().toLowerCase());
-
-      if (id) {
-        product = await prisma.product.update({
-          where: { id },
-          data: {
-            ...rest,
-            tags: {
-              set: tagsArray
-            }
-          }
-        });
-      } else {
-        product = await prisma.product.create({
-          data: {
-            ...rest,
-            tags: {
-              set: tagsArray
-            }
-          }
-        });
-      };
-
-      if(formData.getAll("images")) {
-        
-      };
-
-      return {
-        product
-      };
-    });
+    let saved: Product;
+    if (id) {
+      saved = await prisma.product.update({
+        where: { id },
+        data: { ...rest, tags: { set: tagsArray } },
+      });
+    } else {
+      saved = await prisma.product.create({
+        data: { ...rest, tags: { set: tagsArray } },
+      });
+    }
 
     revalidatePath("/admin/products");
-    revalidatePath(`/admin/product/${product.slug}`);
-    revalidatePath(`/products/${product.slug}`);
+    revalidatePath(`/admin/product/${saved.slug}`);
+    revalidatePath(`/products/${saved.slug}`);
 
-    return {
-      ok: true,
-      product: prismaTx.product
-    }
+    return { ok: true, product: saved } as const;
   } catch (error) {
-    return {
-      ok: false,
-      message: "Revisar los logs, no se pudo actualizar/crear el producto"
-    }
+    Logger.error({
+      title: "Create/Update Product Failed",
+      message: "No se pudo actualizar/crear el producto",
+      error,
+    });
+    return { ok: false, message: "No se pudo actualizar/crear el producto" } as const;
   }
 };

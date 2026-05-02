@@ -1,36 +1,28 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { Logger } from "@/lib/logger";
 
-export const getProductBySlug = async(slug: string) => {
+export const getProductBySlug = async (slug: string) => {
   try {
     const product = await prisma.product.findFirst({
+      where: { slug },
       include: {
-        ProductImage: {
-          select: {
-            url: true
-          }
-        },
-        category: {
-          select: {
-            id: true,
-            name: true
-          }
-        }
+        ProductImage: { select: { url: true, position: true } },
+        category: { select: { id: true, name: true } },
       },
-      where: {
-        slug: slug,
-      }
     });
-
     if (!product) return null;
-
     return {
       ...product,
-      images: product.ProductImage.sort((a, b) => a.position - b.position).map(image => image.url)
+      images: product.ProductImage.sort((a, b) => a.position - b.position).map((i) => i.url),
     };
   } catch (error) {
-    console.log(error);
-    throw new Error("Error al obtener producto por slug");
+    Logger.error({
+      title: "Get Product By Slug Failed",
+      message: "Error obteniendo producto",
+      error,
+    });
+    return null;
   }
 };
