@@ -1,21 +1,21 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { Logger } from "@/lib/logger";
 
-export const getStockBySlug = async(slug: string): Promise<number> => {
+export const getStockBySlug = async (slug: string): Promise<number> => {
   try {
     const product = await prisma.product.findFirst({
-      where: {
-        slug: slug
-      },
-      select: {
-        inStock: true,
-      },
+      where: { slug },
+      select: { inStock: true },
     });
-
     return product?.inStock ?? 0;
   } catch (error) {
-    console.log(error);
-    throw new Error("Error al obtener el stock del producto");
-  };
+    Logger.error({
+      title: "Get Stock Failed",
+      message: "No se pudo obtener stock",
+      error,
+    });
+    return 0;
+  }
 };
