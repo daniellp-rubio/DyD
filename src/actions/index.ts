@@ -25,3 +25,8 @@ export * from "./products/get-product-by-slug";
 export * from "./products/get-stock-by-slug";
 export * from "./products/get-related-products";
 export * from "./products/get-top-product-slugs";
+
+export * from "./users/change-user-role";
+export * from "./users/users-paginated-users";
+
+export * from "./payments/set-paid-at";
