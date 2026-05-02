@@ -2,7 +2,7 @@
 
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import { Prisma } from "@/generated/prisma";
+import { Prisma } from "@prisma/client";
 
 import prisma from "@/lib/prisma";
 import { Logger } from "@/lib/logger";
