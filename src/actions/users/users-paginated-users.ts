@@ -1,28 +1,48 @@
 "use server";
 
+import { z } from "zod";
 import { auth } from "@/auth-config";
-
 import prisma from "@/lib/prisma";
 
-export const getPaginatedUsers = async() => {
+const optionsSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  take: z.coerce.number().int().min(1).max(100).default(20),
+});
 
+interface Options {
+  page?: number;
+  take?: number;
+}
+
+export const getPaginatedUsers = async (options: Options = {}) => {
   const session = await auth();
-
   if (session?.user.role !== "admin") {
-    return {
-      ok: false,
-      message: "Debe de ser un usuario administrador"
-    };
-  };
+    return { ok: false, message: "Debe ser administrador" } as const;
+  }
 
-  const users = await prisma.user.findMany({
-    orderBy: {
-      name: "desc"
-    }
-  });
+  const { page, take } = optionsSchema.parse(options);
+
+  const [users, totalCount] = await prisma.$transaction([
+    prisma.user.findMany({
+      take,
+      skip: (page - 1) * take,
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        emailVerified: true,
+        image: true,
+      },
+    }),
+    prisma.user.count(),
+  ]);
 
   return {
     ok: true,
-    users
-  }
+    users,
+    currentPage: page,
+    totalPages: Math.ceil(totalCount / take),
+  } as const;
 };
