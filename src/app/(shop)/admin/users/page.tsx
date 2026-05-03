@@ -1,20 +1,23 @@
 export const revalidate = 0;
 
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 
-// Actions
-import { getPaginatedUsers } from '@/actions';
+import { getPaginatedUsers } from "@/actions";
+import { If, Title } from "@/components";
+import UsersTable from "./ui/UsersTable";
 
-// Components
-import { If, Title } from '@/components';
-import UsersTable from './ui/UsersTable';
+interface Props {
+  searchParams?: Promise<{ page?: string }>;
+}
 
-export default async function OrdersPage() {
-  const { ok, users = [] } = await getPaginatedUsers();
+export default async function AdminUsersPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const page = params?.page ? parseInt(params.page) : 1;
 
-  if (!ok) {
-    redirect("auth/login");
-  };
+  const result = await getPaginatedUsers({ page });
+  if (!result.ok) redirect("/auth/login");
+
+  const users = result.users;
 
   return (
     <>
@@ -31,4 +34,4 @@ export default async function OrdersPage() {
       </If>
     </>
   );
-};
+}
