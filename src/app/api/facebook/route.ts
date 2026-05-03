@@ -1,42 +1,43 @@
-
-// src/app/api/facebook/route.ts
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import crypto from "crypto";
 
-const PIXEL_ID = process.env.META_PIXEL_ID!;
-const ACCESS_TOKEN = process.env.META_CAPI_TOKEN!;
-const TEST_CODE = process.env.META_TEST_EVENT_CODE; // opcional
+import { Logger } from "@/lib/logger";
+
+const PIXEL_ID = process.env.META_PIXEL_ID;
+const ACCESS_TOKEN = process.env.META_CAPI_TOKEN;
+const TEST_CODE = process.env.META_TEST_EVENT_CODE;
 
 function sha256(v?: string) {
   if (!v) return undefined;
   return crypto.createHash("sha256").update(v.trim().toLowerCase()).digest("hex");
 }
 
+interface FacebookEventBody {
+  event_name?: string;
+  event_id?: string;
+  event_source_url?: string;
+  custom_data?: Record<string, unknown>;
+  email?: string;
+  phone?: string;
+  fbp?: string;
+  fbc?: string;
+  external_id?: string;
+}
+
 export async function POST(req: Request) {
+  if (!PIXEL_ID || !ACCESS_TOKEN) {
+    return NextResponse.json({ error: "tracking disabled" }, { status: 503 });
+  }
+
   try {
     const h = await headers();
-    const ip =
-      h.get("x-forwarded-for")?.split(",")[0] ||
-      h.get("x-real-ip") ||
-      undefined;
+    const ip = h.get("x-forwarded-for")?.split(",")[0] || h.get("x-real-ip") || undefined;
     const ua = h.get("user-agent") || undefined;
 
-    const body = await req.json();
-    // body esperado:
-    // {
-    //   event_name: "Purchase",
-    //   event_id?: string,
-    //   event_source_url?: string,
-    //   custom_data?: object,
-    //   email?: string,
-    //   phone?: string,
-    //   fbp?: string,
-    //   fbc?: string,
-    //   external_id?: string
-    // }
+    const body = (await req.json()) as FacebookEventBody;
 
-    const user_data: Record<string, any> = {
+    const user_data: Record<string, unknown> = {
       em: sha256(body.email),
       ph: sha256(body.phone),
       external_id: body.external_id ? sha256(body.external_id) : undefined,
@@ -45,10 +46,8 @@ export async function POST(req: Request) {
       client_user_agent: ua,
       client_ip_address: ip,
     };
-
-    // Eliminar campos undefined
     Object.keys(user_data).forEach(
-      (k) => user_data[k] === undefined && delete user_data[k]
+      (k) => user_data[k] === undefined && delete user_data[k],
     );
 
     const payload = {
@@ -72,13 +71,17 @@ export async function POST(req: Request) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      }
+      },
     );
 
     const json = await res.json();
     return NextResponse.json(json, { status: res.ok ? 200 : 400 });
-  } catch (err: any) {
-    console.error("Error enviando evento a Facebook:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err) {
+    Logger.error({
+      title: "Facebook CAPI Failed",
+      message: "Error enviando evento a Facebook",
+      error: err,
+    });
+    return NextResponse.json({ error: "internal" }, { status: 500 });
   }
 }

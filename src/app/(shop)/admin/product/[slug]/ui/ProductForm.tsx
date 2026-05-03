@@ -31,21 +31,19 @@ interface FormInputs {
 export const ProductForm = ({ product, categories }: Props) => {
   const router = useRouter();
 
-  const { handleSubmit, register, formState: { isValid } } = useForm<FormInputs>({
+  const { handleSubmit, register } = useForm<FormInputs>({
     defaultValues: {
       ...product,
       tags: product.tags?.join(", "),
-
-      images: undefined
-    }
+      images: undefined,
+    },
   });
 
-  const onSubmit = async(data: FormInputs) => {
+  const onSubmit = async (data: FormInputs) => {
     const formData = new FormData();
+    const { images: _images, ...productToSave } = data;
 
-    const { images, ...productToSave } = data;
-
-    if (product.id) formData.append("id", product.id ?? "");
+    if (product.id) formData.append("id", product.id);
     formData.append("title", productToSave.title);
     formData.append("slug", productToSave.slug);
     formData.append("description", productToSave.description);
@@ -55,20 +53,14 @@ export const ProductForm = ({ product, categories }: Props) => {
     formData.append("tags", productToSave.tags);
     formData.append("categoryId", productToSave.categoryId);
 
-    if (images) {
-      for(let i = 0; i < images.length; i++) {
-        formData.append("images", images[i]);
-      };
-    };
+    const result = await createUpdateProduct(formData);
 
-    const { ok, product: updatedProduct } = await createUpdateProduct(formData);
-
-    if(!ok) {
-      alert("Produicto no se pudo actualizar");
+    if (!result.ok) {
+      alert("Producto no se pudo actualizar");
       return;
-    };
+    }
 
-    router.replace(`/admin/product/${updatedProduct?.slug}`)
+    router.replace(`/admin/product/${result.product.slug}`);
   };
 
   return (
@@ -157,8 +149,9 @@ export const ProductForm = ({ product, categories }: Props) => {
 
                 <button
                   type="button"
-                  onClick={() => console.log(image.id, image.url)}
                   className="btn-danger w-full rounded-b-xl"
+                  disabled
+                  title="Eliminación pendiente de implementación"
                 >
                   Eliminar
                 </button>
