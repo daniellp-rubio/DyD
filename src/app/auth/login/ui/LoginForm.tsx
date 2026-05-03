@@ -2,10 +2,8 @@
 
 import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
-import { useActionState, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-// Actions
 import { authenticate } from "@/actions";
 import { If, Turnstile } from "@/components";
 import { IoInformationOutline, IoMailOutline, IoLockClosedOutline, IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
@@ -18,14 +16,8 @@ const LoginForm = () => {
 
   useEffect(() => {
     if (errorMessage === "Success") {
-      // router.replace("/");
       window.location.replace("/");
-    };
-    if (errorMessage === "Sucess") window.location.replace("/");
-  };
-
-  useEffect(() => {
-    showMessage();
+    }
   }, [errorMessage]);
 
   const containerVariants = {
@@ -42,8 +34,8 @@ const LoginForm = () => {
   };
 
   return (
-    <motion.form 
-      action={formAction} 
+    <motion.form
+      action={formAction}
       className="flex flex-col w-full"
       variants={containerVariants}
       initial="hidden"
@@ -84,7 +76,7 @@ const LoginForm = () => {
             placeholder="••••••••"
             required
           />
-          <button 
+          <button
             type="button"
             className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
             onClick={() => setShowPassword(!showPassword)}
@@ -104,10 +96,10 @@ const LoginForm = () => {
         aria-live="polite"
         aria-atomic="true"
       >
-        <If condition={errorMessage}>
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }} 
-            animate={{ opacity: 1, scale: 1 }} 
+        <If condition={!!errorMessage && errorMessage !== "Success"}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
             className="flex items-center gap-2 px-3 py-2.5 bg-red-50 text-red-600 border border-red-100 rounded-lg w-full"
           >
             <IoInformationOutline className="h-5 w-5" />
@@ -129,7 +121,6 @@ const LoginForm = () => {
           )
         }
         disabled={isPending}
-        name="redirectTo"
       >
         {isPending ? (
           <>
@@ -141,7 +132,6 @@ const LoginForm = () => {
         )}
       </motion.button>
 
-      {/* divisor line */}
       <motion.div variants={itemVariants} className="flex items-center my-8">
         <div className="flex-1 border-t border-slate-200"></div>
         <div className="px-4 text-sm text-slate-400 font-medium">¿Nuevo en DYD Tech?</div>
