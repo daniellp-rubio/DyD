@@ -1,37 +1,32 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import clsx from 'clsx';
-
-// Components
-import { submitMessage } from '../submitMessage';
-import { If } from '@/components';
-
-// Icons
-import { IoCardOutline } from 'react-icons/io5';
+import { useState } from "react";
 import { SiMercadopago } from "react-icons/si";
 
-interface Props {
-  title: string,
-  id: string,
-  total: number,
-  isPaid: boolean,
-  buyerEmail: string
-};
+import { If } from "@/components";
+import { submitMessage } from "../submitMessage";
 
-export const ButtonPaid = ({ title, id, total, isPaid, buyerEmail }: Props) => {
+interface Props {
+  title: string;
+  id: string;
+  total: number;
+  isPaid: boolean;
+  buyerEmail: string;
+}
+
+export const ButtonPaid = ({ title, id, total, buyerEmail }: Props) => {
   const [loading, setLoading] = useState(false);
+
   const handleCheckout = async () => {
     setLoading(true);
     try {
       const url = await submitMessage(title, id, total, buyerEmail);
       window.location.href = url;
-    } catch (error) {
-      console.error("Error al iniciar el pago:", error);
+    } catch {
       alert("No se pudo iniciar el pago. Intenta nuevamente.");
     } finally {
       setLoading(false);
-    };
+    }
   };
 
   return (
@@ -40,7 +35,6 @@ export const ButtonPaid = ({ title, id, total, isPaid, buyerEmail }: Props) => {
         <div className="animate-pulse mb-4">
           <div className="h-8 bg-gray-300 rounded" />
         </div>
-
         <div className="animate-pulse">
           <div className="h-8 bg-gray-300 rounded" />
         </div>
