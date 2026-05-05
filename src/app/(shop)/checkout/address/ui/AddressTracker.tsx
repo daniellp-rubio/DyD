@@ -2,21 +2,17 @@
 
 import { useEffect } from "react";
 
+declare global {
+  interface Window {
+    fbq?: (...args: unknown[]) => void;
+    gtag?: (...args: unknown[]) => void;
+  }
+}
+
 export const AddressTracker = () => {
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      // GA4
-      (window as any).gtag?.("event", "begin_checkout", {
-        currency: "COP",
-      });
-
-      // Meta Pixel
-      window.fbq?.("track", "InitiateCheckout", {
-        currency: "COP",
-      });
-
-      console.log("Evento begin_checkout enviado 🚀");
-    }
+    window.gtag?.("event", "begin_checkout", { currency: "COP" });
+    window.fbq?.("track", "InitiateCheckout", { currency: "COP" });
   }, []);
 
   return null;
