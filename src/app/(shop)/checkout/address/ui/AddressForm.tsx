@@ -80,16 +80,16 @@ const AddressForm = ({ userStoredAddress = {} }: Props) => {
     }
   }, [address]);
 
-  const onSubmit = async(data: FormInputs) => {
+  const onSubmit = async (data: FormInputs) => {
     setErrorMessage("");
     const { rememberAddress, ...restAddress } = data;
     setAddress(data);
 
     if (rememberAddress) {
-      await setUserAddress(restAddress, session!.user.id);
+      await setUserAddress(restAddress);
     } else {
-      await deleteUserAddress(session!.user.id);
-    };
+      await deleteUserAddress();
+    }
 
     router.push("/checkout");
   };
