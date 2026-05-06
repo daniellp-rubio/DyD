@@ -4,7 +4,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-import { getProductBySlug, getTopProductSlugs } from "@/actions";
+import { getProductBySlug, getTopProductSlugs, getPaginatedProductsWithImages } from "@/actions";
 
 import {
   Breadcrumbs,
@@ -74,7 +74,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
-  const { products } = await getPaginatedProductsWithImages({ page: 1 });
 
   if (!product) notFound();
 

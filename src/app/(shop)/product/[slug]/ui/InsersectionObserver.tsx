@@ -58,7 +58,7 @@ const InsersectionObserver = ({ product }: Props) => {
           </div>
         </div>
 
-        <AddToCart product={product} mode="insersectionObserver" />
+        <AddToCart product={product} />
       </div>
     </div>
   );

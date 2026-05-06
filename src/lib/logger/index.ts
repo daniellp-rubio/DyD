@@ -3,10 +3,13 @@ import { sendToDiscord, LogLevel } from "./discord-transport";
 interface LogParams {
   title: string;
   message: string;
-  metadata?: Record<string, any>;
-  error?: any;
+  metadata?: Record<string, unknown>;
+  error?: unknown;
 }
 
+const isProd = process.env.NODE_ENV === "production";
+
+/* eslint-disable no-console */
 export class Logger {
   static debug(params: LogParams | string) {
     this.log("debug", params);
@@ -25,28 +28,35 @@ export class Logger {
   }
 
   private static log(level: LogLevel, params: LogParams | string) {
-    const normalizedParams: LogParams = typeof params === "string" 
-      ? { title: "Log", message: params } 
-      : params;
+    const normalized: LogParams =
+      typeof params === "string" ? { title: "Log", message: params } : params;
 
-    // 1. Console Output for local debugging
     const timestamp = new Date().toISOString();
-    const consolePrefix = `[${timestamp}] [${level.toUpperCase()}] ${normalizedParams.title}:`;
-    
-    switch(level) {
-      case "info": console.info(consolePrefix, normalizedParams.message); break;
-      case "warn": console.warn(consolePrefix, normalizedParams.message, normalizedParams.metadata || ""); break;
-      case "error": console.error(consolePrefix, normalizedParams.message, normalizedParams.error || ""); break;
-      case "debug": console.log(consolePrefix, normalizedParams.message); break;
+    const prefix = `[${timestamp}] [${level.toUpperCase()}] ${normalized.title}:`;
+
+    if (!isProd) {
+      switch (level) {
+        case "info":
+          console.info(prefix, normalized.message);
+          break;
+        case "warn":
+          console.warn(prefix, normalized.message, normalized.metadata ?? "");
+          break;
+        case "error":
+          console.error(prefix, normalized.message, normalized.error ?? "");
+          break;
+        case "debug":
+          console.log(prefix, normalized.message);
+          break;
+      }
     }
 
-    // 2. Dispatch to Discord (Fire and forget)
     sendToDiscord({
       level,
-      title: normalizedParams.title,
-      message: normalizedParams.message,
-      metadata: normalizedParams.metadata,
-      error: normalizedParams.error instanceof Error ? normalizedParams.error : undefined,
+      title: normalized.title,
+      message: normalized.message,
+      metadata: normalized.metadata,
+      error: normalized.error instanceof Error ? normalized.error : undefined,
     });
   }
 }

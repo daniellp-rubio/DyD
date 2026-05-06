@@ -4,32 +4,42 @@ interface DiscordMessageParams {
   level: LogLevel;
   title: string;
   message: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   error?: Error;
 }
 
+interface DiscordEmbed {
+  title: string;
+  description: string;
+  color: number;
+  timestamp: string;
+  fields: { name: string; value: string; inline: boolean }[];
+}
+
 const COLORS = {
-  info: 3447003,   // Blue
-  warn: 16776960,  // Yellow
-  error: 16711680, // Red
-  debug: 9807270,  // Grey
+  info: 3447003,
+  warn: 16776960,
+  error: 16711680,
+  debug: 9807270,
 };
 
-export const sendToDiscord = async ({ level, title, message, metadata, error }: DiscordMessageParams) => {
-  if (level === "debug") return; // Usually we don't send debug to Discord
+export const sendToDiscord = async ({
+  level,
+  title,
+  message,
+  metadata,
+  error,
+}: DiscordMessageParams) => {
+  if (level === "debug") return;
 
   const webhookUrl =
     level === "info"
       ? process.env.DISCORD_WEBHOOK_URL_INFO
       : process.env.DISCORD_WEBHOOK_URL_ERRORS;
 
-  if (!webhookUrl) {
-    console.warn(`[Discord Logger] Missing webhook URL for level: ${level}`);
-    return;
-  }
+  if (!webhookUrl) return;
 
-  // Construct standard Embed
-  const embed: any = {
+  const embed: DiscordEmbed = {
     title: `[${level.toUpperCase()}] ${title}`,
     description: message,
     color: COLORS[level],
@@ -38,25 +48,16 @@ export const sendToDiscord = async ({ level, title, message, metadata, error }: 
   };
 
   if (metadata && Object.keys(metadata).length > 0) {
-    let metadataString = "```json\n" + JSON.stringify(metadata, null, 2).slice(0, 1000) + "\n```";
     embed.fields.push({
       name: "Metadata",
-      value: metadataString,
+      value: "```json\n" + JSON.stringify(metadata, null, 2).slice(0, 1000) + "\n```",
       inline: false,
     });
   }
 
   if (error) {
-    embed.fields.push({
-      name: "Error Name",
-      value: error.name,
-      inline: true,
-    });
-    embed.fields.push({
-      name: "Error Message",
-      value: error.message,
-      inline: true,
-    });
+    embed.fields.push({ name: "Error Name", value: error.name, inline: true });
+    embed.fields.push({ name: "Error Message", value: error.message, inline: true });
     if (error.stack) {
       embed.fields.push({
         name: "Stack Trace",
@@ -67,20 +68,12 @@ export const sendToDiscord = async ({ level, title, message, metadata, error }: 
   }
 
   try {
-    const response = await fetch(webhookUrl, {
+    await fetch(webhookUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        embeds: [embed],
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ embeds: [embed] }),
     });
-
-    if (!response.ok) {
-      console.error(`[Discord Logger Failed] Status: ${response.status}`);
-    }
-  } catch (err) {
-    console.error("[Discord Logger Failed] Network Error:", err);
+  } catch {
+    // Silent fail — logger must never throw.
   }
 };

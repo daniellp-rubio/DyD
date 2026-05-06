@@ -1,77 +1,89 @@
 "use server";
 
-import { getUserAddress } from "@/actions";
-import { auth } from "@/auth-config";
+import crypto from "crypto";
+import { z } from "zod";
 import { MercadoPagoConfig, Preference } from "mercadopago";
+
+import { auth } from "@/auth-config";
+import prisma from "@/lib/prisma";
+import { Logger } from "@/lib/logger";
 
 const mercadopago = new MercadoPagoConfig({
   accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN!,
 });
 
+const inputSchema = z.object({
+  text: z.string().trim().min(1).max(120),
+  id: z.string().uuid(),
+  accessToken: z.string().min(20),
+});
+
+const hashToken = (raw: string) =>
+  crypto.createHash("sha256").update(raw).digest("hex");
+
 export async function submitMessage(
   text: string,
   id: string,
-  total: number,
-  buyerEmail?: string
+  _total: number,
+  buyerEmail: string,
+  accessToken: string,
 ): Promise<string> {
-  if (typeof text !== 'string' || !text.trim()) throw new Error('Texto inválido');
-  if (typeof id !== 'string' || !id.trim()) throw new Error('ID inválido');
-  if (typeof total !== 'number' || total <= 0) throw new Error('Total inválido');
+  const parsed = inputSchema.safeParse({ text, id, accessToken });
+  if (!parsed.success) throw new Error("Solicitud inválida");
+
+  const session = await auth();
+  if (session?.user.id) throw new Error("Tienes una sesión activa");
+
+  const order = await prisma.order.findFirst({
+    where: {
+      id: parsed.data.id,
+      userId: null,
+      guestAccessToken: hashToken(parsed.data.accessToken),
+    },
+    select: { id: true, total: true, isPaid: true },
+  });
+  if (!order) throw new Error("Orden no existe");
+  if (order.isPaid) throw new Error("La orden ya fue pagada");
 
   const notificationUrl = `${process.env.MERCADOPAGO_NOTIFICATION_URL}/api/mercadopago/pagos`;
   const backUrl = `${process.env.MERCADOPAGO_NOTIFICATION_URL}`;
-
-  const session = await auth();
-
-  if (!session?.user.id) {
-    throw new Error('No se encontro el usuario');
-  };
-
-  const userAddress = await getUserAddress(session.user.id);
-  const firstName = userAddress?.firstName || "Nombre";
-  const lastName = userAddress?.lastName || "Apellido";
+  const tokenParam = `token=${encodeURIComponent(parsed.data.accessToken)}`;
+  const safeEmail = buyerEmail ? buyerEmail.trim().toLowerCase() : undefined;
 
   try {
     const preference = await new Preference(mercadopago).create({
       body: {
         items: [
           {
-            id: id,
-            title: `Orden #${id.split("-").at(-1)}`,
-            description: "Audífonos Bluetooth inalámbricos con estuche de carga",
-            category_id: "electronics",
+            id: order.id,
+            title: `Orden #${order.id.split("-").at(-1)}`,
             quantity: 1,
-            unit_price: total,
+            unit_price: order.total,
             currency_id: "COP",
           },
         ],
-        payer: buyerEmail
-          ? {
-              email: buyerEmail,
-              name: firstName,
-              surname: lastName,
-            }
-          : undefined,
-        metadata: {
-          orderId: id,
-          text
-        },
-        external_reference: id,
+        payer: safeEmail ? { email: safeEmail } : undefined,
+        metadata: { orderId: order.id, text: parsed.data.text },
+        external_reference: order.id,
         back_urls: {
-          success: `${backUrl}/orders/${id}/success`,
-          failure: `${backUrl}/orders/${id}/failure`,
-          pending: `${backUrl}/orders/${id}/pending`
+          success: `${backUrl}/orderswithoutsession/${order.id}/success?${tokenParam}`,
+          failure: `${backUrl}/orderswithoutsession/${order.id}/failure?${tokenParam}`,
+          pending: `${backUrl}/orderswithoutsession/${order.id}/pending?${tokenParam}`,
         },
         auto_return: "approved",
         statement_descriptor: "D&D Gadgets",
-        notification_url: notificationUrl
+        notification_url: notificationUrl,
       },
     });
 
-    if (!preference.init_point) throw new Error('No se pudo generar el link de pago');
-    return preference.init_point!;
-  } catch (error: any) {
-    console.error('❌ Error al crear preferencia de Mercado Pago:', error);
-    throw new Error('No se pudo crear la preferencia de pago');
+    if (!preference.init_point) throw new Error("No se pudo generar el link de pago");
+    return preference.init_point;
+  } catch (error) {
+    Logger.error({
+      title: "MP Preference Failed (guest)",
+      message: "No se pudo crear la preferencia",
+      error,
+    });
+    throw new Error("No se pudo crear la preferencia de pago");
   }
-};
+}

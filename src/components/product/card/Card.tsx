@@ -13,7 +13,6 @@ type Props = {
 };
 
 export const ProductCard = ({ product }: Props) => {
-  console.log("product", product);
   return (
     <Link
       href={`/product/${product.slug}`}

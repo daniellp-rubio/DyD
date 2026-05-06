@@ -49,7 +49,9 @@ const AddToCart = ({ product }: Props) => {
       title: product.title,
       price: product.price,
       quantity,
-      image: product.images[0]
+      image: product.images[0],
+      inStock: product.inStock,
+      contentId: product.contentId,
     };
     addProductToCart(cartProduct);
     setAdded(true);

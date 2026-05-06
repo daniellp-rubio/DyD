@@ -9,7 +9,16 @@ export async function verifyTurnstile(
 ): Promise<boolean> {
   const secret = process.env.TURNSTILE_SECRET_KEY;
 
-  if (!secret) return true;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      Logger.error({
+        title: 'Turnstile Misconfigured',
+        message: 'TURNSTILE_SECRET_KEY missing in production. Failing closed.',
+      });
+      return false;
+    }
+    return true;
+  }
 
   if (!token) return false;
 
