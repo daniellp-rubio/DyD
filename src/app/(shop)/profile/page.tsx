@@ -34,12 +34,13 @@ export default async function ProfilePage() {
   const pendingOrders = totalOrders - paidOrders;
   const recentOrders = orders.slice(0, 5);
 
-  const initials = user.name
-    ?.split(" ")
-    .map(n => n[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase() || "U";
+  const initials =
+    user.name
+      ?.split(" ")
+      .map((n: string) => n[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "U";
 
   return (
     <div className="flex justify-center mb-32 px-4 sm:px-0">

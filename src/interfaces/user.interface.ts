@@ -1,3 +1,4 @@
+import type { Role } from "@prisma/client";
 
 export interface User {
   id: string;
@@ -5,6 +6,8 @@ export interface User {
   email: string;
   emailVerified?: Date | null;
   password: string;
-  role: string;
+  role: Role;
   image?: string | null;
-};
+}
+
+export type SessionUser = Omit<User, "password">;

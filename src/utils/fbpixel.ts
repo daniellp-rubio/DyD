@@ -1,11 +1,11 @@
 declare global {
   interface Window {
-    fbq: (...args: any[]) => void;
+    fbq?: (...args: unknown[]) => void;
   }
 }
 
-export const fbq = (...args: any[]) => {
-  if (typeof window !== "undefined" && window.fbq) {
-    window.fbq(...args);
+export const fbq = (...args: unknown[]) => {
+  if (typeof window !== "undefined") {
+    window.fbq?.(...args);
   }
 };

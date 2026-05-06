@@ -35,3 +35,5 @@ export * from './ui/pagination/Pagination';
 export * from './ui/breadcrumbs/Breadcrumbs';
 export * from './product/tabs/ProductTabs';
 export * from './product/related/RelatedProducts';
+
+export * from './ui/purchase-popup/PurchasePopup';
