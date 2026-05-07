@@ -30,3 +30,9 @@ export * from "./users/change-user-role";
 export * from "./users/users-paginated-users";
 
 export * from "./payments/set-paid-at";
+
+export * from "./content/trigger-generation";
+export * from "./content/approve-content-post";
+export * from "./content/reject-content-post";
+export * from "./content/get-content-posts";
+export * from "./content/get-content-post-by-id";

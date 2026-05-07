@@ -53,16 +53,16 @@ export const HeroSection = () => {
         </div>
 
         {/* Right Product Showcase */}
-        <div className="flex-1 relative w-full min-h-[400px] md:min-h-[500px] max-w-lg md:max-w-xl z-10">
-           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-brand-orange/20 rounded-full blur-[100px] z-0"></div>
-
-           <div className="relative z-10 h-full w-full">
+        <div className="flex-1 relative w-full max-w-lg md:max-w-xl z-10 flex items-center justify-center">
+           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-brand-orange/20 rounded-full blur-[100px] z-0 pointer-events-none"></div>
+           <div className="relative z-10 w-full">
             <Image
               src="/hero-gadgets.png"
               alt="Auriculares Premium DYD Tech"
-              fill
+              width={600}
+              height={600}
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover drop-shadow-2xl rounded-2xl"
+              className="w-full h-auto object-contain drop-shadow-2xl rounded-2xl"
               priority
             />
            </div>

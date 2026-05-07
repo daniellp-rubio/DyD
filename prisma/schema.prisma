@@ -43,6 +43,7 @@ model Product {
   ProductImage   ProductImage[]
   OrderItem      OrderItem[]
   ProductRatings ProductRatings[]
+  ContentPost    ContentPost[]
 
   @@index([categoryId])
 }
@@ -174,4 +175,78 @@ model ProductRatings {
 
   @@unique([userId, productId])
   @@index([productId])
+}
+
+// ─── Content Automation ───────────────────────────────────────────────────────
+
+enum PostStatus {
+  draft
+  ready
+  approved
+  published
+  rejected
+  failed
+}
+
+enum ContentAngle {
+  new_product
+  low_stock
+  promotion
+  educational
+}
+
+enum SocialPlatform {
+  instagram
+  tiktok
+}
+
+model ContentPost {
+  id     String      @id @default(uuid())
+  status PostStatus  @default(draft)
+  angle  ContentAngle?
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productId String
+
+  baseCopy     String?
+  baseImageUrl String?
+
+  pipelineVersion String   @default("1.0")
+  generatedAt     DateTime?
+  approvedAt      DateTime?
+  publishedAt     DateTime?
+
+  adminNotes    String?
+  triggerSource String   @default("cron")
+  triggeredBy   String?
+  errorLog      String?
+
+  platforms ContentPlatformPost[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([productId])
+  @@index([createdAt])
+}
+
+model ContentPlatformPost {
+  id       String         @id @default(uuid())
+  platform SocialPlatform
+
+  caption   String
+  hashtags  String[] @default([])
+  imageUrl  String
+  hookLine  String?
+  suggestedPostTime String?
+
+  contentPost   ContentPost @relation(fields: [contentPostId], references: [id], onDelete: Cascade)
+  contentPostId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([contentPostId, platform])
+  @@index([contentPostId])
 }

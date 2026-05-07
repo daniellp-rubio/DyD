@@ -17,6 +17,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  serverExternalPackages: ["@anthropic-ai/sdk", "node-cron"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },
