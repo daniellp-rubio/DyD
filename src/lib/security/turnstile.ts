@@ -10,13 +10,10 @@ export async function verifyTurnstile(
   const secret = process.env.TURNSTILE_SECRET_KEY;
 
   if (!secret) {
-    if (process.env.NODE_ENV === 'production') {
-      Logger.error({
-        title: 'Turnstile Misconfigured',
-        message: 'TURNSTILE_SECRET_KEY missing in production. Failing closed.',
-      });
-      return false;
-    }
+    Logger.warn({
+      title: 'Turnstile Disabled',
+      message: 'TURNSTILE_SECRET_KEY not set — skipping verification.',
+    });
     return true;
   }
 
