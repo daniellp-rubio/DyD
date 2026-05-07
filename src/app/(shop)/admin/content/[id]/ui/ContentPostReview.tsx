@@ -67,20 +67,21 @@ export function ContentPostReview({ post }: Props) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
+
       {/* Product info */}
-      <div className="bg-brand-gray rounded-xl p-4 flex items-center gap-4">
+      <div className="flex items-center gap-3 rounded-xl bg-brand-gray p-3 sm:gap-4 sm:p-4">
         {post.product.primaryImageUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={post.product.primaryImageUrl}
             alt={post.product.title}
-            className="w-16 h-16 object-cover rounded-lg"
+            className="size-14 shrink-0 rounded-lg object-cover sm:size-16"
           />
         )}
-        <div>
-          <p className="font-extrabold text-brand-black text-lg">{post.product.title}</p>
-          <p className="text-brand-smoke text-sm">
+        <div className="min-w-0">
+          <p className="truncate font-extrabold text-brand-black sm:text-lg">{post.product.title}</p>
+          <p className="mt-0.5 text-xs text-brand-smoke sm:text-sm">
             {post.product.categoryName} · Stock: {post.product.inStock}
           </p>
         </div>
@@ -89,8 +90,8 @@ export function ContentPostReview({ post }: Props) {
       {/* Base copy */}
       {post.baseCopy && (
         <div>
-          <h3 className="font-bold text-brand-black mb-2">Copy base generado</h3>
-          <pre className="bg-brand-gray rounded-xl p-4 text-sm whitespace-pre-wrap font-sans text-brand-black">
+          <h3 className="mb-2 font-bold text-brand-black">Copy base generado</h3>
+          <pre className="whitespace-pre-wrap rounded-xl bg-brand-gray p-3 font-sans text-sm text-brand-black sm:p-4">
             {post.baseCopy}
           </pre>
         </div>
@@ -99,7 +100,7 @@ export function ContentPostReview({ post }: Props) {
       {/* Platform previews */}
       {post.platforms.length > 0 && (
         <div>
-          <h3 className="font-bold text-brand-black mb-3">Contenido por plataforma</h3>
+          <h3 className="mb-3 font-bold text-brand-black">Contenido por plataforma</h3>
           <PlatformPreview
             platforms={post.platforms}
             fallbackImageUrl={post.baseImageUrl ?? post.product.primaryImageUrl}
@@ -109,19 +110,20 @@ export function ContentPostReview({ post }: Props) {
 
       {/* Error log */}
       {post.errorLog && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-          <p className="font-bold text-red-700 mb-1 text-sm">Error del pipeline</p>
-          <pre className="text-xs text-red-600 whitespace-pre-wrap">{post.errorLog}</pre>
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 sm:p-4">
+          <p className="mb-1 text-sm font-bold text-red-700">Error del pipeline</p>
+          <pre className="whitespace-pre-wrap text-xs text-red-600">{post.errorLog}</pre>
         </div>
       )}
 
       {/* Actions */}
       {(post.status === "ready" || post.status === "approved" || post.status === "rejected" || post.status === "failed") && (
-        <div className="border-t border-gray-200 pt-5 space-y-4">
+        <div className="space-y-4 border-t border-gray-200 pt-5">
+
           {post.status === "ready" && (
             <>
               <div>
-                <label htmlFor="admin-notes" className="block text-sm font-bold text-brand-black mb-1">
+                <label htmlFor="admin-notes" className="mb-1 block text-sm font-bold text-brand-black">
                   Notas del admin (opcional)
                 </label>
                 <textarea
@@ -130,22 +132,21 @@ export function ContentPostReview({ post }: Props) {
                   onChange={(e) => setAdminNotes(e.target.value)}
                   rows={2}
                   placeholder="Agregar notas o motivo de rechazo..."
-                  className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-brand-orange resize-none"
+                  className="w-full resize-none rounded-lg border border-gray-300 p-3 text-sm focus:border-brand-orange focus:outline-none"
                 />
               </div>
-
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <button
                   onClick={handleApprove}
                   disabled={isPending}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg font-bold text-sm transition-all disabled:opacity-60"
+                  className="flex-1 rounded-lg bg-green-600 py-3 text-sm font-bold text-white transition-all hover:bg-green-700 disabled:opacity-60 sm:py-2.5"
                 >
                   {isPending ? "Procesando..." : "✓ Aprobar"}
                 </button>
                 <button
                   onClick={handleReject}
                   disabled={isPending}
-                  className="flex-1 border border-red-300 text-red-600 hover:bg-red-50 py-2.5 rounded-lg font-bold text-sm transition-all disabled:opacity-60"
+                  className="flex-1 rounded-lg border border-red-300 py-3 text-sm font-bold text-red-600 transition-all hover:bg-red-50 disabled:opacity-60 sm:py-2.5"
                 >
                   ✕ Rechazar
                 </button>
@@ -157,7 +158,7 @@ export function ContentPostReview({ post }: Props) {
             <button
               onClick={handlePublish}
               disabled={isPending}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-bold text-sm transition-all disabled:opacity-60"
+              className="w-full rounded-lg bg-blue-600 py-3 text-sm font-bold text-white transition-all hover:bg-blue-700 disabled:opacity-60 sm:py-2.5"
             >
               {isPending ? "Publicando..." : "↑ Publicar en redes"}
             </button>
@@ -167,7 +168,7 @@ export function ContentPostReview({ post }: Props) {
             <button
               onClick={handleRegenerate}
               disabled={isPending}
-              className="w-full bg-brand-orange hover:bg-[#E64A19] text-white py-2.5 rounded-lg font-bold text-sm transition-all disabled:opacity-60"
+              className="w-full rounded-lg bg-brand-orange py-3 text-sm font-bold text-white transition-all hover:bg-[#E64A19] disabled:opacity-60 sm:py-2.5"
             >
               {isPending ? "Generando..." : "↻ Regenerar para este producto"}
             </button>
@@ -175,13 +176,13 @@ export function ContentPostReview({ post }: Props) {
         </div>
       )}
 
-      {/* Feedback message */}
+      {/* Feedback */}
       {message && (
         <div
-          className={`rounded-xl p-4 text-sm font-semibold ${
+          className={`rounded-xl border p-4 text-sm font-semibold ${
             message.type === "ok"
-              ? "bg-green-50 text-green-700 border border-green-200"
-              : "bg-red-50 text-red-700 border border-red-200"
+              ? "border-green-200 bg-green-50 text-green-700"
+              : "border-red-200 bg-red-50 text-red-700"
           }`}
         >
           {message.text}

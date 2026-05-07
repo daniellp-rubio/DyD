@@ -76,7 +76,7 @@ export const Sidebar = () => {
         aria-label="Menú lateral"
         aria-hidden={!isSideMenuOpen}
         className={clsx(
-          "fixed right-0 top-0 z-20 h-screen w-[85vw] max-w-[320px] bg-brand-white p-4 text-brand-black shadow-2xl transition-transform duration-300 sm:max-w-none sm:w-[350px] sm:p-5 md:w-[420px] lg:w-[500px]",
+          "fixed right-0 top-0 z-20 flex h-dvh w-[85vw] max-w-sm flex-col overflow-y-auto bg-brand-white px-4 py-5 text-brand-black shadow-2xl transition-transform duration-300 sm:w-[350px] sm:max-w-none sm:px-5 md:w-[420px] lg:w-[500px]",
           { "translate-x-full": !isSideMenuOpen }
         )}
       >
@@ -84,53 +84,57 @@ export const Sidebar = () => {
           type="button"
           aria-label="Cerrar menú"
           onClick={closeSideMenu}
-          className="absolute right-5 top-5 text-brand-black transition-colors hover:text-brand-orange"
+          className="absolute right-3 top-3 rounded-full p-1 text-brand-black transition-colors hover:text-brand-orange sm:right-5 sm:top-5"
         >
-          <IoCloseOutline size={50} />
+          <IoCloseOutline size={42} className="block sm:hidden" />
+          <IoCloseOutline size={50} className="hidden sm:block" />
         </button>
 
         <form onSubmit={onSearch} className="relative mt-12 sm:mt-14">
-          <IoSearchOutline size={20} className="absolute left-2 top-2 text-brand-smoke" />
+          <IoSearchOutline
+            size={18}
+            className="absolute left-2 top-1/2 -translate-y-1/2 text-brand-smoke"
+          />
           <input
             type="search"
             autoComplete="off"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar productos..."
-            className="w-full rounded border-b-2 border-brand-smoke/40 bg-brand-white py-1 pl-10 pr-10 text-base text-brand-black placeholder:text-brand-smoke focus:border-brand-orange focus:outline-none sm:text-xl"
+            className="w-full rounded border-b-2 border-brand-smoke/40 bg-brand-white py-2 pl-9 pr-4 text-base text-brand-black placeholder:text-brand-smoke focus:border-brand-orange focus:outline-none sm:text-xl"
           />
         </form>
 
-        <ViewRolUser rolUser={rolUser} closeSideMenu={closeSideMenu} />
+        <div className="mt-2 flex flex-1 flex-col pb-4">
+          <ViewRolUser rolUser={rolUser} closeSideMenu={closeSideMenu} />
 
-        <If condition={isAuthenticated}>
-          <button
-            type="button"
-            onClick={onLogout}
-            className="mt-6 flex w-full items-center rounded p-2 text-brand-black transition-colors hover:bg-brand-smoke/20 hover:text-brand-orange sm:mt-10"
-          >
-            <IoLogOutOutline size={24} className="sm:hidden" />
-            <IoLogOutOutline size={30} className="hidden sm:block" />
-            <span className="ml-3 text-base sm:text-xl">Salir</span>
-          </button>
-        </If>
+          <If condition={isAuthenticated}>
+            <button
+              type="button"
+              onClick={onLogout}
+              className="mt-1 flex min-h-[48px] w-full items-center rounded-lg px-2 text-brand-black transition-colors hover:bg-brand-smoke/20 hover:text-brand-orange"
+            >
+              <IoLogOutOutline size={24} className="shrink-0 sm:size-[30px]" />
+              <span className="ml-3 text-base sm:text-xl">Salir</span>
+            </button>
+          </If>
 
-        <If condition={!isAuthenticated}>
-          <Link
-            href="/auth/login"
-            onClick={closeSideMenu}
-            className="mt-6 flex items-center rounded p-2 text-brand-black transition-colors hover:bg-brand-smoke/20 hover:text-brand-orange sm:mt-10"
-          >
-            <IoLogInOutline size={24} className="sm:hidden" />
-            <IoLogInOutline size={30} className="hidden sm:block" />
-            <span className="ml-3 text-base sm:text-xl">Ingresar</span>
-          </Link>
-        </If>
+          <If condition={!isAuthenticated}>
+            <Link
+              href="/auth/login"
+              onClick={closeSideMenu}
+              className="mt-1 flex min-h-[48px] items-center rounded-lg px-2 text-brand-black transition-colors hover:bg-brand-smoke/20 hover:text-brand-orange"
+            >
+              <IoLogInOutline size={24} className="shrink-0 sm:size-[30px]" />
+              <span className="ml-3 text-base sm:text-xl">Ingresar</span>
+            </Link>
+          </If>
 
-        <If condition={rolUser === "admin"}>
-          <div className="my-10 h-px w-full bg-brand-smoke/40" />
-          <ViewRolAdmin rolUser={rolUser} closeSideMenu={closeSideMenu} />
-        </If>
+          <If condition={rolUser === "admin"}>
+            <div className="my-5 h-px w-full bg-brand-smoke/40 sm:my-8" />
+            <ViewRolAdmin rolUser={rolUser} closeSideMenu={closeSideMenu} />
+          </If>
+        </div>
       </nav>
     </>
   );

@@ -38,24 +38,31 @@ export default async function ContentPostPage({ params }: Props) {
   if (!post) notFound();
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="flex items-center gap-2 text-sm text-brand-smoke mb-6">
-        <Link href="/admin/content" className="hover:text-brand-orange transition-colors">
+    <div className="mx-auto max-w-4xl p-4 sm:p-6">
+
+      {/* Breadcrumb */}
+      <div className="mb-5 flex items-center gap-1.5 text-sm text-brand-smoke sm:mb-6">
+        <Link href="/admin/content" className="hover:text-brand-orange transition-colors shrink-0">
           ← Contenido Social
         </Link>
         <span>/</span>
-        <span className="text-brand-black font-medium truncate max-w-xs">{post.product.title}</span>
+        <span className="truncate text-brand-black font-medium">{post.product.title}</span>
       </div>
 
-      <div className="flex items-baseline justify-between mb-6">
-        <h1 className="text-2xl font-extrabold text-brand-black">Revisión de post</h1>
-        <div className="text-right">
+      {/* Page header */}
+      <div className="mb-5 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-baseline sm:justify-between">
+        <h1 className="text-xl font-extrabold text-brand-black sm:text-2xl">Revisión de post</h1>
+        <div className="sm:text-right">
           <span className={`font-bold text-sm ${STATUS_COLOR[post.status]}`}>
             {STATUS_LABEL[post.status]}
           </span>
           {post.generatedAt && (
-            <p className="text-xs text-brand-smoke mt-0.5">
-              Generado: {new Date(post.generatedAt).toLocaleString("es-CO")}
+            <p className="mt-0.5 text-xs text-brand-smoke">
+              Generado:{" "}
+              {new Date(post.generatedAt).toLocaleString("es-CO", {
+                dateStyle: "short",
+                timeStyle: "short",
+              })}
             </p>
           )}
         </div>
