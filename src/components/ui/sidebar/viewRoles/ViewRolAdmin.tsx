@@ -3,7 +3,7 @@ import Link from "next/link";
 import { If } from "@/components/if/If";
 
 import { HiOutlineDeviceMobile } from "react-icons/hi";
-import { IoPeopleOutline, IoTicketOutline } from "react-icons/io5";
+import { IoPeopleOutline, IoTicketOutline, IoShareSocialOutline } from "react-icons/io5";
 
 interface Props {
   rolUser: "user" | "admin" | undefined;
@@ -14,6 +14,7 @@ const LINKS = [
   { href: "/admin/products", label: "Productos", Icon: HiOutlineDeviceMobile },
   { href: "/admin/orders", label: "Ordenes", Icon: IoTicketOutline },
   { href: "/admin/users", label: "Usuarios", Icon: IoPeopleOutline },
+  { href: "/admin/content", label: "Contenido Social", Icon: IoShareSocialOutline },
 ] as const;
 
 const ViewRolAdmin = ({ rolUser, closeSideMenu }: Props) => {

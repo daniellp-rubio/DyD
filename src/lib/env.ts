@@ -35,6 +35,28 @@ const schema = z.object({
 
   DISCORD_WEBHOOK_URL_INFO: z.string().url().optional(),
   DISCORD_WEBHOOK_URL_ERRORS: z.string().url().optional(),
+
+  ANTHROPIC_API_KEY: z.string().min(1).optional(),
+  TOGETHER_API_KEY: z.string().min(1).optional(),
+  IMAGE_PROVIDER: z.enum(["local", "together"]).default("together"),
+  COMFYUI_URL: z.string().url().default("http://127.0.0.1:8188"),
+  COMFYUI_UNET: z.string().optional(),
+  COMFYUI_VAE: z.string().optional(),
+  COMFYUI_CLIP_T5: z.string().optional(),
+  COMFYUI_CLIP_L: z.string().optional(),
+  CONTENT_CRON_SCHEDULE: z.string().default("0 14 * * *"),
+  CONTENT_CRON_ENABLED: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
+  CONTENT_CRON_SECRET: z.string().min(16).optional(),
+  CLOUDINARY_CLOUD_NAME: z.string().default("dtttwxbgr"),
+  CLOUDINARY_LOGO_PUBLIC_ID: z.string().default("Logo_Compacto_con_Fondo_Transparente_DYD_TECH_640x640_pvsf3w"),
+
+  // Social publishing
+  INSTAGRAM_BUSINESS_ACCOUNT_ID: z.string().optional(),
+  INSTAGRAM_ACCESS_TOKEN: z.string().optional(),
+  TIKTOK_ACCESS_TOKEN: z.string().optional(),
 });
 
 const parsed = schema.safeParse(process.env);
