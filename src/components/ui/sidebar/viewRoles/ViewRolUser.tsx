@@ -22,10 +22,11 @@ const ViewRolUser = ({ rolUser, closeSideMenu }: Props) => {
           key={href}
           href={href}
           onClick={closeSideMenu}
-          className="mt-10 flex items-center rounded p-2 text-brand-black transition-colors hover:bg-brand-smoke/20 hover:text-brand-orange"
+          className="mt-6 flex items-center rounded p-2 text-brand-black transition-colors hover:bg-brand-smoke/20 hover:text-brand-orange sm:mt-10"
         >
-          <Icon size={30} />
-          <span className="ml-3 text-xl">{label}</span>
+          <Icon size={24} className="sm:hidden" />
+          <Icon size={30} className="hidden sm:block" />
+          <span className="ml-3 text-base sm:text-xl">{label}</span>
         </Link>
       ))}
     </If>
