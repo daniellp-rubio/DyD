@@ -31,7 +31,7 @@ async function main() {
 
   const categoriesDB = await prisma.category.findMany();
 
-  const categoriesMap = categoriesDB.reduce((map: any, category: any) => {
+  const categoriesMap = categoriesDB.reduce((map: Record<string, string>, category) => {
     map[category.name.toLowerCase()] = category.id;
     return map;
   }, {} as Record<string, string>);
