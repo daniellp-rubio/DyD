@@ -121,10 +121,11 @@ export function ContentPostReview({ post }: Props) {
           {post.status === "ready" && (
             <>
               <div>
-                <label className="block text-sm font-bold text-brand-black mb-1">
+                <label htmlFor="admin-notes" className="block text-sm font-bold text-brand-black mb-1">
                   Notas del admin (opcional)
                 </label>
                 <textarea
+                  id="admin-notes"
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}
                   rows={2}

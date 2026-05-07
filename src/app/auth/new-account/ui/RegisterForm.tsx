@@ -92,7 +92,6 @@ const RegisterForm = () => {
               }
             )}
             type="text"
-            autoFocus
             placeholder="Tu nombre"
             {...register("name", {
               required: "El nombre es obligatorio",

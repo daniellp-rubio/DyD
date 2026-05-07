@@ -4,6 +4,9 @@ import { redirect } from "next/navigation";
 // Actions
 import { getCategories, getProductBySlug } from "@/actions";
 
+// Interfaces
+import { Product, ProductImage } from "@/interfaces";
+
 // Components
 import { Title } from "@/components";
 import { ProductForm } from "./ui/ProductForm";
@@ -34,7 +37,7 @@ export default async function ProductPage({ params }: Props) {
     <>
       <Title title={title} />
 
-      <ProductForm product={product ?? ({} as any)} categories={categories} />
+      <ProductForm product={product ?? ({} as Partial<Product> & { ProductImage?: ProductImage[] })} categories={categories} />
     </>
   );
 };
