@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import Image from "next/image";
 
 interface ImageProps {
@@ -38,21 +37,6 @@ export const AnimateMoveLeft = ({ images }: Props) => {
         ))}
       </div>
 
-      <style jsx global>{`
-        @keyframes marquee {
-          0% {
-            transform: translateX(0%);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-
-        .animate-marquee {
-          animation: marquee 20s linear infinite;
-          will-change: transform;
-        }
-      `}</style>
     </div>
   );
 };
