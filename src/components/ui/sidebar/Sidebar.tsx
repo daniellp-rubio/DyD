@@ -76,7 +76,7 @@ export const Sidebar = () => {
         aria-label="Menú lateral"
         aria-hidden={!isSideMenuOpen}
         className={clsx(
-          "fixed right-0 top-0 z-20 h-screen w-[220px] bg-brand-white p-5 text-brand-black shadow-2xl transition-transform duration-300 sm:w-[350px] md:w-[420px] lg:w-[500px]",
+          "fixed right-0 top-0 z-20 h-screen w-[85vw] max-w-[320px] bg-brand-white p-4 text-brand-black shadow-2xl transition-transform duration-300 sm:max-w-none sm:w-[350px] sm:p-5 md:w-[420px] lg:w-[500px]",
           { "translate-x-full": !isSideMenuOpen }
         )}
       >
@@ -89,7 +89,7 @@ export const Sidebar = () => {
           <IoCloseOutline size={50} />
         </button>
 
-        <form onSubmit={onSearch} className="relative mt-14">
+        <form onSubmit={onSearch} className="relative mt-12 sm:mt-14">
           <IoSearchOutline size={20} className="absolute left-2 top-2 text-brand-smoke" />
           <input
             type="search"
@@ -97,7 +97,7 @@ export const Sidebar = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar productos..."
-            className="w-full rounded border-b-2 border-brand-smoke/40 bg-brand-white py-1 pl-10 pr-10 text-xl text-brand-black placeholder:text-brand-smoke focus:border-brand-orange focus:outline-none"
+            className="w-full rounded border-b-2 border-brand-smoke/40 bg-brand-white py-1 pl-10 pr-10 text-base text-brand-black placeholder:text-brand-smoke focus:border-brand-orange focus:outline-none sm:text-xl"
           />
         </form>
 
@@ -107,10 +107,11 @@ export const Sidebar = () => {
           <button
             type="button"
             onClick={onLogout}
-            className="mt-10 flex w-full items-center rounded p-2 text-brand-black transition-colors hover:bg-brand-smoke/20 hover:text-brand-orange"
+            className="mt-6 flex w-full items-center rounded p-2 text-brand-black transition-colors hover:bg-brand-smoke/20 hover:text-brand-orange sm:mt-10"
           >
-            <IoLogOutOutline size={30} />
-            <span className="ml-3 text-xl">Salir</span>
+            <IoLogOutOutline size={24} className="sm:hidden" />
+            <IoLogOutOutline size={30} className="hidden sm:block" />
+            <span className="ml-3 text-base sm:text-xl">Salir</span>
           </button>
         </If>
 
@@ -118,10 +119,11 @@ export const Sidebar = () => {
           <Link
             href="/auth/login"
             onClick={closeSideMenu}
-            className="mt-10 flex items-center rounded p-2 text-brand-black transition-colors hover:bg-brand-smoke/20 hover:text-brand-orange"
+            className="mt-6 flex items-center rounded p-2 text-brand-black transition-colors hover:bg-brand-smoke/20 hover:text-brand-orange sm:mt-10"
           >
-            <IoLogInOutline size={30} />
-            <span className="ml-3 text-xl">Ingresar</span>
+            <IoLogInOutline size={24} className="sm:hidden" />
+            <IoLogInOutline size={30} className="hidden sm:block" />
+            <span className="ml-3 text-base sm:text-xl">Ingresar</span>
           </Link>
         </If>
 
