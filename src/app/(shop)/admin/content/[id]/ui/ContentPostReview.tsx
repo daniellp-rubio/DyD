@@ -188,7 +188,9 @@ export function ContentPostReview({ post }: Props) {
                 controls
                 loop
                 className="w-full max-w-sm rounded-xl aspect-[9/16] object-cover bg-black"
-              />
+              >
+                <track kind="captions" />
+              </video>
               <div className="flex gap-2">
                 <a
                   href={post.videoUrl}

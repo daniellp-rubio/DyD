@@ -7,7 +7,7 @@ import Link from "next/link";
 import { If } from "@/components/if/If";
 
 // Icons
-import { IoSearchOutline, IoCartOutline } from "react-icons/io5"
+import { IoCartOutline } from "react-icons/io5"
 
 // Fonts
 import { inter } from "@/config/fonts";

@@ -49,14 +49,8 @@ export const ZoomImage = ({ src, alt, lensSize = 160, zoom = 2, className, width
     setPos({ x: cx, y: cy });
   };
 
-  const bgW = natural.w * zoom;
-  const bgH = natural.h * zoom;
-
   const maxZoom = natural.w / rendered.w;
   const appliedZoom = Math.min(zoom, maxZoom);
-
-  const bgLeft = pos ? -(pos.x * scaleX * appliedZoom - lensSize / 2) : 0;
-  const bgTop = pos ? -(pos.y * scaleY * appliedZoom - lensSize / 2) : 0;
 
   return (
     <div
