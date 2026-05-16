@@ -1,10 +1,21 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import type { ContentPostDetail } from "@/interfaces/content.interface";
+import { checkVideoJob } from "@/lib/video-generation/local-api";
+import type { ContentPostDetail, VideoStatus } from "@/interfaces/content.interface";
 
-export async function getContentPostById(id: string): Promise<ContentPostDetail | null> {
-  const post = await prisma.contentPost.findUnique({
+type PostWithRelations = NonNullable<Awaited<ReturnType<typeof fetchPost>>>;
+
+// Video fields are not in the generated Prisma types until migration runs.
+// This intersection type bridges the gap — remove after prisma generate.
+type PostRow = PostWithRelations & {
+  videoUrl: string | null;
+  videoStatus: VideoStatus | null;
+  videoJobId: string | null;
+};
+
+async function fetchPost(id: string) {
+  return prisma.contentPost.findUnique({
     where: { id },
     include: {
       product: {
@@ -16,9 +27,23 @@ export async function getContentPostById(id: string): Promise<ContentPostDetail 
       platforms: true,
     },
   });
+}
 
-  if (!post) return null;
+async function updatePost(id: string, data: Record<string, unknown>): Promise<PostRow> {
+  return prisma.contentPost.update({
+    where: { id },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: data as any,
+    include: {
+      product: {
+        include: { category: true, ProductImage: { orderBy: { position: "asc" } } },
+      },
+      platforms: true,
+    },
+  }) as unknown as Promise<PostRow>;
+}
 
+function mapPost(post: PostRow): ContentPostDetail {
   const images = post.product.ProductImage.map((i) => i.url);
   const primaryImageUrl =
     post.product.ProductImage.find((i) => i.position === 2)?.url ?? images[0] ?? "";
@@ -34,6 +59,8 @@ export async function getContentPostById(id: string): Promise<ContentPostDetail 
     generatedAt: post.generatedAt,
     approvedAt: post.approvedAt,
     triggerSource: post.triggerSource,
+    videoUrl: post.videoUrl,
+    videoStatus: post.videoStatus,
     product: {
       id: post.product.id,
       title: post.product.title,
@@ -58,4 +85,28 @@ export async function getContentPostById(id: string): Promise<ContentPostDetail 
       suggestedPostTime: p.suggestedPostTime,
     })),
   };
+}
+
+export async function getContentPostById(id: string): Promise<ContentPostDetail | null> {
+  const raw = await fetchPost(id);
+  if (!raw) return null;
+
+  let post = raw as PostRow;
+
+  // Auto-check FastAPI when video is generating — updates DB so next render shows final state.
+  if (post.videoStatus === "generating" && post.videoJobId) {
+    try {
+      const job = await checkVideoJob(post.videoJobId);
+
+      if (job.status === "done" && job.video_url) {
+        post = await updatePost(id, { videoStatus: "ready", videoUrl: job.video_url, videoJobId: null });
+      } else if (job.status === "failed") {
+        post = await updatePost(id, { videoStatus: "failed", videoJobId: null });
+      }
+    } catch {
+      // FastAPI offline or job not found — keep current status, poller will retry.
+    }
+  }
+
+  return mapPost(post);
 }
