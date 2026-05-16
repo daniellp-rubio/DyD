@@ -1,7 +1,5 @@
 'use client';
 
-import { MouseEvent, useRef, useState } from "react";
-
 // Components
 import { ZoomImage } from "@/components/images/ZoomImage";
 

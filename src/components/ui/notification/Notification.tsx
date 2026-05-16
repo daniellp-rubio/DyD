@@ -26,7 +26,7 @@ export const Notification = ({ timeout }: Props) => {
       clearTimeout(progressTimeout);
       clearTimeout(time);
     };
-  }, []);
+  }, [timeout]);
 
   useEffect(() => {
     if (show) {
@@ -34,7 +34,7 @@ export const Notification = ({ timeout }: Props) => {
     } else {
       closeNotification();
     }
-  }, [show]);
+  }, [show, openNotification, closeNotification]);
 
   if (!show) return null;
 

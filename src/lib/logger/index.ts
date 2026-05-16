@@ -9,7 +9,6 @@ interface LogParams {
 
 const isProd = process.env.NODE_ENV === "production";
 
-/* eslint-disable no-console */
 export class Logger {
   static debug(params: LogParams | string) {
     this.log("debug", params);

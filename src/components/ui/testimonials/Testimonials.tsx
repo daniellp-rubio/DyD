@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { FaStar, FaQuoteLeft } from "react-icons/fa";
 
 interface Testimonial {
@@ -77,7 +78,7 @@ export const Testimonials = () => {
               <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
                 <div className="w-12 h-12 rounded-full bg-brand-orange/10 flex items-center justify-center text-brand-orange font-bold text-lg overflow-hidden">
                   {t.avatar ? (
-                    <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" />
+                    <Image src={t.avatar} alt={t.name} width={48} height={48} className="w-full h-full object-cover" />
                   ) : (
                     t.name.charAt(0).toUpperCase() || "?"
                   )}
