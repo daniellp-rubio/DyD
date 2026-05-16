@@ -6,30 +6,15 @@ import { runCopywriter } from "@/agents/copywriter";
 import { runInstagramSeoAgent } from "@/agents/instagram-seo-agent";
 import { runTikTokSeoAgent } from "@/agents/tiktok-seo-agent";
 import { runImageDesignerAgent } from "@/agents/image-designer-agent";
-import type { PipelineResult } from "@/interfaces/content.interface";
+import type { ProductContext } from "@/interfaces/content.interface";
+import type { ContentAngle } from "@prisma/client";
 
-export async function runContentPipeline(
-  triggerSource: "cron" | "manual",
-  triggeredBy?: string,
-  productId?: string
-): Promise<PipelineResult> {
-  // Step 1: select product
-  const product = await selectProductForToday(productId);
-  const suggestedAngle = resolveAngle(product);
-
-  // Create draft record
-  const contentPost = await prisma.contentPost.create({
-    data: {
-      productId: product.id,
-      triggerSource,
-      triggeredBy,
-      angle: suggestedAngle,
-      status: "draft",
-    },
-  });
-
+async function runAgentsForPost(
+  contentPostId: string,
+  product: ProductContext,
+  suggestedAngle: ContentAngle
+): Promise<void> {
   try {
-    // Steps 2-6: run agents (strategist + copywriter sequential; IG/TikTok/images parallel)
     const strategy = await runContentStrategist(product, suggestedAngle);
     const baseCopy = await runCopywriter(product, strategy);
 
@@ -39,10 +24,9 @@ export async function runContentPipeline(
       runImageDesignerAgent(product, strategy),
     ]);
 
-    // Step 7: persist results
     await prisma.$transaction([
       prisma.contentPost.update({
-        where: { id: contentPost.id },
+        where: { id: contentPostId },
         data: {
           status: "ready",
           angle: strategy.angle,
@@ -53,7 +37,7 @@ export async function runContentPipeline(
       }),
       prisma.contentPlatformPost.create({
         data: {
-          contentPostId: contentPost.id,
+          contentPostId,
           platform: "instagram",
           caption: instagram.caption,
           hashtags: instagram.hashtags,
@@ -63,7 +47,7 @@ export async function runContentPipeline(
       }),
       prisma.contentPlatformPost.create({
         data: {
-          contentPostId: contentPost.id,
+          contentPostId,
           platform: "tiktok",
           caption: tiktok.caption,
           hashtags: tiktok.hashtags,
@@ -76,23 +60,13 @@ export async function runContentPipeline(
 
     Logger.info({
       title: "Content Pipeline Completed",
-      message: `Post generado para: ${product.title} | Ángulo: ${strategy.angle} | Trigger: ${triggerSource}`,
+      message: `Post generado para: ${product.title} | Ángulo: ${strategy.angle}`,
     });
-
-    return {
-      contentPostId: contentPost.id,
-      product,
-      strategy,
-      baseCopy,
-      instagram,
-      tiktok,
-      images,
-    };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
     await prisma.contentPost.update({
-      where: { id: contentPost.id },
+      where: { id: contentPostId },
       data: { status: "failed", errorLog: errorMessage },
     });
 
@@ -104,4 +78,51 @@ export async function runContentPipeline(
 
     throw error;
   }
+}
+
+// Full synchronous pipeline — used by cron/API (fire-and-forget on that side)
+export async function runContentPipeline(
+  triggerSource: "cron" | "manual",
+  triggeredBy?: string,
+  productId?: string
+): Promise<{ contentPostId: string }> {
+  const product = await selectProductForToday(productId);
+  const suggestedAngle = resolveAngle(product);
+
+  const contentPost = await prisma.contentPost.create({
+    data: {
+      productId: product.id,
+      triggerSource,
+      triggeredBy,
+      angle: suggestedAngle,
+      status: "draft",
+    },
+  });
+
+  await runAgentsForPost(contentPost.id, product, suggestedAngle);
+  return { contentPostId: contentPost.id };
+}
+
+// Fire-and-forget: creates draft in DB immediately and runs agents in background.
+// Returns the draft ID so the caller can show it in the UI right away.
+export async function createDraftAsync(
+  triggerSource: "cron" | "manual",
+  triggeredBy?: string,
+  productId?: string
+): Promise<string> {
+  const product = await selectProductForToday(productId);
+  const suggestedAngle = resolveAngle(product);
+
+  const contentPost = await prisma.contentPost.create({
+    data: {
+      productId: product.id,
+      triggerSource,
+      triggeredBy,
+      angle: suggestedAngle,
+      status: "draft",
+    },
+  });
+
+  void runAgentsForPost(contentPost.id, product, suggestedAngle);
+  return contentPost.id;
 }

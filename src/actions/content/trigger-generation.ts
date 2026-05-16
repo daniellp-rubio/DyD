@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth-config";
 import { revalidatePath } from "next/cache";
-import { runContentPipeline } from "@/services/content-pipeline";
+import { createDraftAsync } from "@/services/content-pipeline";
 import type { GenerationActionResult } from "@/interfaces/content.interface";
 
 export async function triggerGeneration(productId?: string): Promise<GenerationActionResult> {
@@ -12,9 +12,9 @@ export async function triggerGeneration(productId?: string): Promise<GenerationA
   }
 
   try {
-    const result = await runContentPipeline("manual", session.user.id, productId);
+    const contentPostId = await createDraftAsync("manual", session.user.id, productId);
     revalidatePath("/admin/content");
-    return { ok: true, contentPostId: result.contentPostId };
+    return { ok: true, contentPostId };
   } catch (error) {
     return {
       ok: false,

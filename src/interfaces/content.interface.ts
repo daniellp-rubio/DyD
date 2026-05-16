@@ -2,6 +2,9 @@ import type { PostStatus, ContentAngle, SocialPlatform } from "@prisma/client";
 
 export type { PostStatus, ContentAngle, SocialPlatform };
 
+// Mirrors the Prisma VideoStatus enum — will be replaced by the generated type after migration.
+export type VideoStatus = "pending" | "generating" | "ready" | "failed";
+
 export interface ProductContext {
   id: string;
   title: string;
@@ -80,6 +83,8 @@ export interface ContentPostDetail {
   generatedAt: Date | null;
   approvedAt: Date | null;
   triggerSource: string;
+  videoUrl: string | null;
+  videoStatus: VideoStatus | null;
   product: ProductContext;
   platforms: {
     id: string;
