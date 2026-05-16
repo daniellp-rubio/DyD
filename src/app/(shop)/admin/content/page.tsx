@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth-config";
 import Link from "next/link";
 import { getContentPosts } from "@/actions/content/get-content-posts";
-import { triggerGeneration } from "@/actions/content/trigger-generation";
+import { GenerateButton } from "./ui/GenerateButton";
+import { DraftPoller } from "./ui/DraftPoller";
 import type { PostStatus } from "@prisma/client";
 
 const STATUS_BADGE: Record<PostStatus, { label: string; class: string }> = {
@@ -64,9 +65,11 @@ export default async function ContentAdminPage({ searchParams }: Props) {
   const page = params?.page ? parseInt(params.page) : 1;
 
   const { posts, totalPages } = await getContentPosts(page);
+  const hasDrafts = posts.some((p) => p.status === "draft");
 
   return (
     <div className="mx-auto max-w-6xl p-4 sm:p-6">
+      <DraftPoller hasDrafts={hasDrafts} />
 
       {/* Header */}
       <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-start sm:justify-between">
@@ -76,14 +79,9 @@ export default async function ContentAdminPage({ searchParams }: Props) {
             Genera, revisa y aprueba publicaciones para Instagram y TikTok.
           </p>
         </div>
-        <form action={async () => { "use server"; await triggerGeneration(); }} className="sm:shrink-0">
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-brand-orange px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#E64A19] sm:w-auto"
-          >
-            + Generar ahora
-          </button>
-        </form>
+        <div className="sm:shrink-0">
+          <GenerateButton />
+        </div>
       </div>
 
       {posts.length === 0 ? (
