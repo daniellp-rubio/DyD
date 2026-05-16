@@ -24,9 +24,6 @@ export const StarRating: FC<StarRatingProps> = ({
   showCount = true,
 }) => {
   const [hover, setHover] = useState<number | null>(null);
-  const [selectedRating, setSelectedRating] = useState<number | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [comment, setComment] = useState("");
 
   const handleClick = (index: number) => {
     if (readOnly || !onChange) return;

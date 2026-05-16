@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 // Components
 import { Title } from "@/components";
 
