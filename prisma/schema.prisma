@@ -179,6 +179,13 @@ model ProductRatings {
 
 // ─── Content Automation ───────────────────────────────────────────────────────
 
+enum VideoStatus {
+  pending
+  generating
+  ready
+  failed
+}
+
 enum PostStatus {
   draft
   ready
@@ -220,6 +227,10 @@ model ContentPost {
   triggerSource String   @default("cron")
   triggeredBy   String?
   errorLog      String?
+
+  videoUrl    String?
+  videoStatus VideoStatus?
+  videoJobId  String?
 
   platforms ContentPlatformPost[]
 
