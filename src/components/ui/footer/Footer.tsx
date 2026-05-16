@@ -56,8 +56,8 @@ export const Footer = () => {
             <ul className="space-y-2 text-sm text-white/60">
               <li>Medellín, Colombia</li>
               <li>
-                <a href="https://wa.me/573000000000" target="_blank" rel="noopener noreferrer" className="hover:text-brand-orange transition-colors">
-                  WhatsApp: +57 300 000 0000
+                <a href="https://wa.me/573137671413" target="_blank" rel="noopener noreferrer" className="hover:text-brand-orange transition-colors">
+                  WhatsApp: +57 313 767 1413
                 </a>
               </li>
             </ul>

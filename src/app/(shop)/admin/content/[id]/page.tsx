@@ -5,6 +5,7 @@ import { auth } from "@/auth-config";
 import Link from "next/link";
 import { getContentPostById } from "@/actions/content/get-content-post-by-id";
 import { ContentPostReview } from "./ui/ContentPostReview";
+import { VideoPoller } from "./ui/VideoPoller";
 import type { PostStatus } from "@prisma/client";
 
 const STATUS_LABEL: Record<PostStatus, string> = {
@@ -68,6 +69,7 @@ export default async function ContentPostPage({ params }: Props) {
         </div>
       </div>
 
+      <VideoPoller videoStatus={post.videoStatus} />
       <ContentPostReview post={post} />
     </div>
   );

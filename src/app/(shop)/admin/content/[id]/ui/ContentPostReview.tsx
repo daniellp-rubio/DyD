@@ -6,6 +6,7 @@ import { approveContentPost } from "@/actions/content/approve-content-post";
 import { rejectContentPost } from "@/actions/content/reject-content-post";
 import { triggerGeneration } from "@/actions/content/trigger-generation";
 import { publishPost } from "@/actions/content/publish-content-post";
+import { generateVideo } from "@/actions/content/generate-video";
 import { PlatformPreview } from "./PlatformPreview";
 import type { ContentPostDetail } from "@/interfaces/content.interface";
 
@@ -66,6 +67,30 @@ export function ContentPostReview({ post }: Props) {
     });
   };
 
+  const handleGenerateVideo = () => {
+    startTransition(async () => {
+      const result = await generateVideo(post.id);
+      if (result.ok) {
+        setMessage({ type: "ok", text: "Generación de video iniciada. Puede tardar 2–5 min." });
+        router.refresh();
+      } else {
+        setMessage({ type: "error", text: result.message });
+      }
+    });
+  };
+
+  const handleRetryVideo = () => {
+    startTransition(async () => {
+      const result = await generateVideo(post.id);
+      if (result.ok) {
+        setMessage({ type: "ok", text: "Reintentando generación de video…" });
+        router.refresh();
+      } else {
+        setMessage({ type: "error", text: result.message });
+      }
+    });
+  };
+
   return (
     <div className="space-y-5 sm:space-y-6">
 
@@ -104,7 +129,99 @@ export function ContentPostReview({ post }: Props) {
           <PlatformPreview
             platforms={post.platforms}
             fallbackImageUrl={post.baseImageUrl ?? post.product.primaryImageUrl}
+            videoUrl={post.videoUrl}
           />
+        </div>
+      )}
+
+      {/* Video section — only shown for approved posts */}
+      {post.status === "approved" && (
+        <div className="rounded-xl border border-gray-200 p-4 space-y-3">
+          <h3 className="font-bold text-brand-black">Video generado por IA</h3>
+
+          {/* No video yet */}
+          {!post.videoStatus && (
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-brand-smoke">
+                Genera un video animado del producto para Reels y TikTok.
+              </p>
+              <button
+                onClick={handleGenerateVideo}
+                disabled={isPending}
+                className="shrink-0 rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-purple-700 disabled:opacity-60"
+              >
+                {isPending ? "Iniciando…" : "▶ Generar Video"}
+              </button>
+            </div>
+          )}
+
+          {/* Generating */}
+          {post.videoStatus === "generating" && (
+            <div className="flex items-center gap-3 rounded-lg bg-purple-50 border border-purple-200 p-3">
+              <svg className="size-5 animate-spin text-purple-600 shrink-0" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              <div>
+                <p className="text-sm font-bold text-purple-700">Generando video…</p>
+                <p className="text-xs text-purple-600">Puede tardar 2–5 minutos. La página se actualiza automáticamente.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Pending (queued) */}
+          {post.videoStatus === "pending" && (
+            <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-3">
+              <p className="text-sm font-bold text-yellow-700">En cola…</p>
+              <p className="text-xs text-yellow-600">El video comenzará a generarse en breve.</p>
+            </div>
+          )}
+
+          {/* Ready */}
+          {post.videoStatus === "ready" && post.videoUrl && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-bold text-green-700">✓ Video listo</span>
+              </div>
+              <video
+                src={post.videoUrl}
+                controls
+                loop
+                className="w-full max-w-sm rounded-xl aspect-[9/16] object-cover bg-black"
+              />
+              <div className="flex gap-2">
+                <a
+                  href={post.videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg border border-brand-orange px-3 py-2 text-xs font-bold text-brand-orange hover:bg-brand-orange hover:text-white transition-colors"
+                >
+                  ↓ Descargar
+                </a>
+                <button
+                  onClick={handleGenerateVideo}
+                  disabled={isPending}
+                  className="rounded-lg border border-gray-300 px-3 py-2 text-xs font-bold text-brand-smoke hover:bg-gray-50 disabled:opacity-60 transition-colors"
+                >
+                  ↻ Regenerar
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Failed */}
+          {post.videoStatus === "failed" && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 space-y-2">
+              <p className="text-sm font-bold text-red-700">Error generando video</p>
+              <button
+                onClick={handleRetryVideo}
+                disabled={isPending}
+                className="rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-60 transition-colors"
+              >
+                {isPending ? "Reintentando…" : "↻ Reintentar"}
+              </button>
+            </div>
+          )}
         </div>
       )}
 

@@ -16,9 +16,10 @@ interface PlatformPost {
 interface Props {
   platforms: PlatformPost[];
   fallbackImageUrl?: string;
+  videoUrl?: string | null;
 }
 
-export function PlatformPreview({ platforms, fallbackImageUrl }: Props) {
+export function PlatformPreview({ platforms, fallbackImageUrl, videoUrl }: Props) {
   const ig = platforms.find((p) => p.platform === "instagram");
   const tt = platforms.find((p) => p.platform === "tiktok");
 
@@ -36,6 +37,7 @@ export function PlatformPreview({ platforms, fallbackImageUrl }: Props) {
           platform="instagram"
           post={ig}
           fallbackImageUrl={fallbackImageUrl}
+          videoUrl={videoUrl}
           onCopy={copyToClipboard}
         />
       )}
@@ -45,6 +47,7 @@ export function PlatformPreview({ platforms, fallbackImageUrl }: Props) {
           platform="tiktok"
           post={tt}
           fallbackImageUrl={fallbackImageUrl}
+          videoUrl={videoUrl}
           onCopy={copyToClipboard}
         />
       )}
@@ -57,15 +60,17 @@ function PlatformCard({
   platform,
   post,
   fallbackImageUrl,
+  videoUrl,
   onCopy,
 }: {
   title: string;
   platform: SocialPlatform;
   post: PlatformPost;
   fallbackImageUrl?: string;
+  videoUrl?: string | null;
   onCopy: (text: string, label: string) => void;
 }) {
-  const [tab, setTab] = useState<"preview" | "copy">("preview");
+  const [tab, setTab] = useState<"preview" | "video" | "copy">("preview");
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {
@@ -88,11 +93,15 @@ function PlatformCard({
       setIsDownloading(false);
     }
   };
+
   const isIG = platform === "instagram";
   const hashtags = post.hashtags.map((h) => `#${h}`).join(" ");
   const fullCopyText = isIG
     ? `${post.caption}\n\n${hashtags}`
     : `${post.hookLine ? post.hookLine + "\n\n" : ""}${post.caption}\n\n${hashtags}`;
+
+  type TabId = "preview" | "video" | "copy";
+  const tabs: TabId[] = ["preview", ...(videoUrl ? (["video"] as TabId[]) : []), "copy"];
 
   return (
     <div className="border border-gray-200 rounded-2xl overflow-hidden bg-white">
@@ -104,18 +113,17 @@ function PlatformCard({
       </div>
 
       <div className="flex border-b border-gray-100">
-        <button
-          onClick={() => setTab("preview")}
-          className={`flex-1 py-2 text-sm font-bold transition-colors ${tab === "preview" ? "text-brand-orange border-b-2 border-brand-orange" : "text-brand-smoke"}`}
-        >
-          Preview
-        </button>
-        <button
-          onClick={() => setTab("copy")}
-          className={`flex-1 py-2 text-sm font-bold transition-colors ${tab === "copy" ? "text-brand-orange border-b-2 border-brand-orange" : "text-brand-smoke"}`}
-        >
-          Copiar
-        </button>
+        {tabs.map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`flex-1 py-2 text-sm font-bold capitalize transition-colors ${
+              tab === t ? "text-brand-orange border-b-2 border-brand-orange" : "text-brand-smoke"
+            }`}
+          >
+            {t === "preview" ? "Preview" : t === "video" ? "Video" : "Copiar"}
+          </button>
+        ))}
       </div>
 
       {tab === "preview" && (
@@ -156,6 +164,30 @@ function PlatformCard({
               <span className="text-xs text-brand-smoke">+{post.hashtags.length - 8} más</span>
             )}
           </div>
+        </div>
+      )}
+
+      {tab === "video" && videoUrl && (
+        <div className="p-4 space-y-3">
+          <video
+            src={videoUrl}
+            controls
+            loop
+            playsInline
+            className={`w-full rounded-xl object-cover bg-black ${isIG ? "aspect-[9/16] max-h-[360px]" : "aspect-[9/16] max-h-[360px]"}`}
+          />
+          <a
+            href={videoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full py-2 text-center text-sm font-bold text-brand-orange border border-brand-orange rounded-lg hover:bg-brand-orange hover:text-white transition-colors"
+          >
+            ↓ Descargar video
+          </a>
+          {!isIG && post.hookLine && (
+            <p className="font-black text-brand-black text-base">{post.hookLine}</p>
+          )}
+          <p className="text-sm text-brand-black whitespace-pre-line line-clamp-4">{post.caption}</p>
         </div>
       )}
 
