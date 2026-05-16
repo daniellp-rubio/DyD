@@ -175,7 +175,9 @@ function PlatformCard({
             loop
             playsInline
             className={`w-full rounded-xl object-cover bg-black ${isIG ? "aspect-[9/16] max-h-[360px]" : "aspect-[9/16] max-h-[360px]"}`}
-          />
+          >
+            <track kind="captions" />
+          </video>
           <a
             href={videoUrl}
             target="_blank"
