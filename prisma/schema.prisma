@@ -208,8 +208,8 @@ enum SocialPlatform {
 }
 
 model ContentPost {
-  id     String      @id @default(uuid())
-  status PostStatus  @default(draft)
+  id     String        @id @default(uuid())
+  status PostStatus    @default(draft)
   angle  ContentAngle?
 
   product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
@@ -218,13 +218,13 @@ model ContentPost {
   baseCopy     String?
   baseImageUrl String?
 
-  pipelineVersion String   @default("1.0")
+  pipelineVersion String    @default("1.0")
   generatedAt     DateTime?
   approvedAt      DateTime?
   publishedAt     DateTime?
 
   adminNotes    String?
-  triggerSource String   @default("cron")
+  triggerSource String  @default("cron")
   triggeredBy   String?
   errorLog      String?
 
@@ -246,10 +246,10 @@ model ContentPlatformPost {
   id       String         @id @default(uuid())
   platform SocialPlatform
 
-  caption   String
-  hashtags  String[] @default([])
-  imageUrl  String
-  hookLine  String?
+  caption           String
+  hashtags          String[] @default([])
+  imageUrl          String
+  hookLine          String?
   suggestedPostTime String?
 
   contentPost   ContentPost @relation(fields: [contentPostId], references: [id], onDelete: Cascade)
@@ -260,4 +260,69 @@ model ContentPlatformPost {
 
   @@unique([contentPostId, platform])
   @@index([contentPostId])
+}
+
+// ─── Roadmap automation: intelligence, ads, trends ──────────────────────────
+// Standalone tables (soft references by id) to keep migrations non-destructive.
+
+model VideoAnalysis {
+  id              String          @id @default(uuid())
+  contentPostId   String?
+  platform        SocialPlatform?
+  videoUrl        String
+  hookRetention3s Float? // % de retención a los 3s (predictor de viralidad)
+  viralityScore   Float?
+  pacingScore     Float?
+  ctaScore        Float?
+  retentionCurve  Json?
+  rawAnalysis     Json?
+  verdict         String? // winner | needs_iteration | neutral
+  createdAt       DateTime        @default(now())
+
+  @@index([contentPostId])
+  @@index([verdict])
+  @@index([createdAt])
+}
+
+model WinningPattern {
+  id             String   @id @default(uuid())
+  hookStyle      String
+  pacingAvg      Float?
+  ctaPosition    Float?
+  retention3s    Float?
+  viralityScore  Float?
+  sampleVideoUrl String?
+  timesUsed      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([viralityScore])
+}
+
+model AdInsight {
+  id          String   @id @default(uuid())
+  campaignId  String
+  adsetId     String?
+  adId        String?
+  spend       Float    @default(0)
+  impressions Int      @default(0)
+  clicks      Int      @default(0)
+  ctr         Float    @default(0)
+  cpc         Float    @default(0)
+  roas        Float?
+  actions     Json?
+  capturedAt  DateTime @default(now())
+
+  @@index([campaignId])
+  @@index([capturedAt])
+}
+
+model TrendReport {
+  id            String   @id @default(uuid())
+  source        String   @default("daily-scan")
+  report        String // síntesis en markdown
+  opportunities Json?
+  createdAt     DateTime @default(now())
+
+  @@index([createdAt])
 }

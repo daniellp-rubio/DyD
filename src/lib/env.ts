@@ -57,6 +57,31 @@ const schema = z.object({
   INSTAGRAM_BUSINESS_ACCOUNT_ID: z.string().optional(),
   INSTAGRAM_ACCESS_TOKEN: z.string().optional(),
   TIKTOK_ACCESS_TOKEN: z.string().optional(),
+
+  // ── Roadmap automation (all optional: app boots without these keys) ──
+  // Video generation provider. "local" = existing video-server (default); "fal" = fal.ai cloud.
+  VIDEO_PROVIDER: z.enum(["local", "fal"]).default("local"),
+  FAL_KEY: z.string().optional(),
+  FAL_VIDEO_MODEL: z.string().default("fal-ai/wan/v2.2-a14b/image-to-video/turbo"),
+
+  // Memories.ai — video retention / hook analysis
+  MEMORIES_AI_API_KEY: z.string().optional(),
+  MEMORIES_AI_BASE_URL: z.string().url().default("https://api-tools.memories.ai"),
+
+  // Firecrawl — competitor / market scraping
+  FIRECRAWL_API_KEY: z.string().optional(),
+  FIRECRAWL_BASE_URL: z.string().url().default("https://api.firecrawl.dev"),
+
+  // Meta Ads (Marketing API, Graph)
+  META_ACCESS_TOKEN: z.string().optional(),
+  META_AD_ACCOUNT_ID: z.string().optional(), // act_XXXXXXXXXX
+  META_FB_PAGE_ID: z.string().optional(),
+  META_GRAPH_VERSION: z.string().default("v21.0"),
+
+  // Market-intel sources
+  YOUTUBE_API_KEY: z.string().optional(),
+  REDDIT_CLIENT_ID: z.string().optional(),
+  REDDIT_CLIENT_SECRET: z.string().optional(),
 });
 
 const parsed = schema.safeParse(process.env);

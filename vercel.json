@@ -3,5 +3,11 @@
     "src/app/api/**/*.ts": {
       "maxDuration": 10
     }
-  }
+  },
+  "crons": [
+    { "path": "/api/cron/trend-scan", "schedule": "0 13 * * *" },
+    { "path": "/api/cron/video-analyze", "schedule": "0 3 * * *" },
+    { "path": "/api/cron/ads-optimize", "schedule": "0 1 * * *" },
+    { "path": "/api/cron/daily-briefing", "schedule": "30 12 * * *" }
+  ]
 }
