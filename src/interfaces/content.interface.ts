@@ -104,3 +104,33 @@ export type GenerationActionResult =
 export type ApprovalActionResult =
   | { ok: true }
   | { ok: false; message: string };
+
+// ─── Market Intelligence & Ad Copy (herramientas admin) ─────────────────────
+
+export interface MarketIntelResult {
+  audienceLanguage: string[]; // frases reales que usa la audiencia del nicho
+  buyingObjections: string[]; // principales objeciones de compra
+  contentOpportunity: string; // ángulo que la competencia no está usando bien
+  recommendedCopy: string; // copy listo para el próximo post
+  sourcesAnalyzed: number; // # de items externos analizados (0 si no hubo datos)
+}
+
+export interface AdCopyVariation {
+  angle: string; // precio | calidad | urgencia | social_proof
+  headline: string; // <= 40 caracteres
+  description: string; // <= 125 caracteres
+  cta: string; // Enviar mensaje | Comprar ahora | Ver más
+}
+
+export interface AdCopyResult {
+  productTitle: string;
+  variations: AdCopyVariation[];
+}
+
+export type MarketIntelActionResult =
+  | { ok: true; data: MarketIntelResult }
+  | { ok: false; message: string };
+
+export type AdCopyActionResult =
+  | { ok: true; data: AdCopyResult }
+  | { ok: false; message: string };
