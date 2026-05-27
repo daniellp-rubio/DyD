@@ -10,6 +10,7 @@ import { Product, ProductImage } from "@/interfaces";
 // Components
 import { Title } from "@/components";
 import { ProductForm } from "./ui/ProductForm";
+import { AdCopyButton } from "./ui/AdCopyButton";
 
 interface Params {
   slug: string
@@ -38,6 +39,8 @@ export default async function ProductPage({ params }: Props) {
       <Title title={title} />
 
       <ProductForm product={product ?? ({} as Partial<Product> & { ProductImage?: ProductImage[] })} categories={categories} />
+
+      {product?.id && <AdCopyButton productId={product.id} />}
     </>
   );
 };
