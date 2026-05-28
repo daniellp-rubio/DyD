@@ -5,7 +5,7 @@ import { useState } from "react";
 // Components
 import { Swiper as SwiperObject } from 'swiper';
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, FreeMode, Navigation, Thumbs } from "swiper/modules";
+import { FreeMode, Navigation, Thumbs } from "swiper/modules";
 
 // Styles
 import 'swiper/css';
@@ -33,11 +33,8 @@ export const ProductSlideshow = ({ images, title, className }: Props) => {
         } as React.CSSProperties}
         spaceBetween={10}
         navigation={true}
-        autoplay={{
-          delay: 2500
-        }}
         thumbs={{ swiper: thumbsSwiper }}
-        modules={[FreeMode, Navigation, Thumbs, Autoplay]}
+        modules={[FreeMode, Navigation, Thumbs]}
         className="mySwiper2"
       >
         {

@@ -13,10 +13,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    template:  "%s - DYD Tech | Gadgets",
-    default: "Home - DYD Tech | Gadgets"
+    template: "%s | DYD Tech — Gadgets y Audio Premium Colombia",
+    default: "DYD Tech | Gadgets y Audio Premium en Colombia"
   },
-  description: "Accesorios tecnológicos",
+  description: "Auriculares, AirPods, gaming y smart tech de alta fidelidad. Envío express en Colombia, pagos seguros y garantía extendida.",
   icons: {
     icon: "/favicon_(640x640px).png"
   }
@@ -28,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es-CO">
       <head>
         {/* <!-- Meta Pixel Code --> */}
           <Script id="facebook-pixel" strategy="afterInteractive">

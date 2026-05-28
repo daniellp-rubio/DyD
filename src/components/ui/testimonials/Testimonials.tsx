@@ -68,11 +68,7 @@ export const Testimonials = () => {
               </div>
 
               <p className="text-brand-black/80 text-base leading-relaxed mb-6 min-h-[80px] italic">
-                {t.content || (
-                  <span className="text-brand-smoke/40 not-italic">
-                    [Testimonio pendiente]
-                  </span>
-                )}
+                {t.content}
               </p>
 
               <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
@@ -80,16 +76,12 @@ export const Testimonials = () => {
                   {t.avatar ? (
                     <Image src={t.avatar} alt={t.name} width={48} height={48} className="w-full h-full object-cover" />
                   ) : (
-                    t.name.charAt(0).toUpperCase() || "?"
+                    t.name.charAt(0).toUpperCase()
                   )}
                 </div>
                 <div>
-                  <p className="text-brand-black font-bold text-sm">
-                    {t.name || <span className="text-brand-smoke/40">[Nombre]</span>}
-                  </p>
-                  <p className="text-brand-smoke text-xs">
-                    {t.role || <span className="text-brand-smoke/40">[Rol / ciudad]</span>}
-                  </p>
+                  <p className="text-brand-black font-bold text-sm">{t.name}</p>
+                  <p className="text-brand-smoke text-xs">{t.role}</p>
                 </div>
               </div>
             </article>

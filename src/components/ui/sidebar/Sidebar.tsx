@@ -4,14 +4,13 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 import { If } from "@/components";
 import ViewRolUser from "./viewRoles/ViewRolUser";
 import ViewRolAdmin from "./viewRoles/ViewRolAdmin";
 
 import { useUIStore } from "@/store";
-import { logout } from "@/actions";
 
 import {
   IoCloseOutline,
@@ -49,8 +48,7 @@ export const Sidebar = () => {
 
   const onLogout = async () => {
     closeSideMenu();
-    await logout();
-    router.refresh();
+    await signOut({ callbackUrl: '/' });
   };
 
   const onSearch = (e: React.FormEvent) => {

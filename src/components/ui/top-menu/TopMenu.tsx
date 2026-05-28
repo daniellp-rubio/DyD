@@ -7,7 +7,7 @@ import Link from "next/link";
 import { If } from "@/components/if/If";
 
 // Icons
-import { IoCartOutline } from "react-icons/io5"
+import { IoCartOutline, IoSearchOutline } from "react-icons/io5"
 
 // Fonts
 import { inter } from "@/config/fonts";
@@ -56,12 +56,13 @@ export const TopMenu = () => {
 
       {/* Search, Cart, Menu */}
       <div className="flex items-center">
-        {/* <Link
-          className="mx-2"
-          href="/search"
+        <button
+          className="mx-2 hover:text-brand-orange transition-colors"
+          aria-label="Buscar"
+          onClick={() => openSideMenu()}
         >
           <IoSearchOutline className="w-5 h-5" />
-        </Link> */}
+        </button>
 
         <Link
           className="mx-2"

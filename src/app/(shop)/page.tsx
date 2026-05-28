@@ -2,6 +2,7 @@ export const revalidate = 60;
 
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { getPaginatedProductsWithImages } from "@/actions";
 
@@ -13,6 +14,7 @@ import {
   Spotlight,
   ProductGrid,
   Testimonials,
+  InstagramFeed,
   Newsletter,
 } from "@/components";
 
@@ -52,8 +54,10 @@ export default async function Home({ searchParams }: Props) {
     "@type": "Organization",
     name: "DYD Tech",
     url: "https://dydtech.com",
-    logo: "/logo_compact_(640x640px).png",
-    sameAs: [],
+    logo: "https://dydtech.com/logo_compact_(640x640px).png",
+    sameAs: [
+      "https://www.instagram.com/tecnologiadyd/",
+    ],
   };
 
   const itemListLd = {
@@ -111,6 +115,9 @@ export default async function Home({ searchParams }: Props) {
       </section>
 
       <Testimonials />
+      <Suspense fallback={null}>
+        <InstagramFeed />
+      </Suspense>
       <Newsletter />
     </div>
   );
