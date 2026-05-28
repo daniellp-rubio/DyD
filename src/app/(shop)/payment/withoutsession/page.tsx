@@ -3,10 +3,7 @@ import { redirect } from 'next/navigation';
 
 // Components
 import { Title } from '@/components';
-import FormWithoutSession from './ui/FormWithoutSession';
-
-// Actions
-import { getUserAddress } from '@/actions';
+import AddressForm from '@/app/(shop)/checkout/address/ui/AddressForm';
 
 export default async function FormNoSessionPage() {
   const session = await auth();
@@ -20,7 +17,7 @@ export default async function FormNoSessionPage() {
       <div className="w-full  xl:w-[1000px] flex flex-col justify-center text-left">
         <Title title="Dirección" subtitle="Dirección de entrega" />
 
-        <FormWithoutSession />
+        <AddressForm mode="guest" />
       </div>
     </div>
   );

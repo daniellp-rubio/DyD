@@ -25,9 +25,12 @@ import { Address } from "@/interfaces";
 // Store
 import { useAddressStore } from "@/store";
 
+type Mode = "auth" | "guest";
+
 interface FormInputs {
   firstName: string;
   lastName: string;
+  email?: string;
   address: string;
   address2?: string;
   postalCode?: string;
@@ -37,21 +40,38 @@ interface FormInputs {
 };
 
 interface Props {
-  userStoredAddress?: Partial<Address>
+  userStoredAddress?: Partial<Address>;
+  mode?: Mode;
 };
 
-const schema = z.object({
-  firstName: z.string().min(1, "El nombre es requerido."),
-  lastName: z.string().min(1, "El apellido es requerido."),
-  address: z.string().min(1, "La dirección es requerido."),
-  address2: z.string().max(50, "La dirección 2 es requerido.").optional(),
-  postalCode: z.string().optional().default(""),
-  city: z.string().min(1, "La cuidad es requerido."),
-  phone: z.string().min(1, "El telefono es requerido."),
-  rememberAddress: z.boolean()
-});
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const AddressForm = ({ userStoredAddress = {} }: Props) => {
+// Single schema for both modes; guest-only requirements (email, postal code)
+// are enforced via superRefine so the resolver type stays stable.
+const buildSchema = (mode: Mode) =>
+  z
+    .object({
+      firstName: z.string().min(1, "El nombre es requerido."),
+      lastName: z.string().min(1, "El apellido es requerido."),
+      email: z.string().optional(),
+      address: z.string().min(1, "La dirección es requerida."),
+      address2: z.string().max(50, "Máximo 50 caracteres.").optional(),
+      postalCode: z.string().optional(),
+      city: z.string().min(1, "La ciudad es requerida."),
+      phone: z.string().min(1, "El teléfono es requerido."),
+      rememberAddress: z.boolean(),
+    })
+    .superRefine((data, ctx) => {
+      if (mode !== "guest") return;
+      if (!data.email || !emailRegex.test(data.email)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["email"], message: "El email es requerido." });
+      }
+      if (!data.postalCode) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["postalCode"], message: "El código postal es requerido." });
+      }
+    });
+
+const AddressForm = ({ userStoredAddress = {}, mode = "auth" }: Props) => {
   const [errorMessage, setErrorMessage] = useState("");
   const {
     handleSubmit,
@@ -59,7 +79,7 @@ const AddressForm = ({ userStoredAddress = {} }: Props) => {
     formState: { errors, isValid },
     reset
   } = useForm<FormInputs>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(buildSchema(mode)),
     defaultValues: {
       ...userStoredAddress,
       rememberAddress: false
@@ -67,9 +87,8 @@ const AddressForm = ({ userStoredAddress = {} }: Props) => {
   });
   const router = useRouter();
 
-  const { data: session } = useSession({
-    required: true,
-  });
+  // Auth mode forces a session (redirects to login when absent); guest does not.
+  useSession({ required: mode === "auth" });
 
   const setAddress = useAddressStore(state => state.setAddress);
   const address = useAddressStore(state => state.address);
@@ -82,9 +101,14 @@ const AddressForm = ({ userStoredAddress = {} }: Props) => {
 
   const onSubmit = async (data: FormInputs) => {
     setErrorMessage("");
-    const { rememberAddress, ...restAddress } = data;
     setAddress(data);
 
+    if (mode === "guest") {
+      router.push("/payment");
+      return;
+    }
+
+    const { rememberAddress, ...restAddress } = data;
     if (rememberAddress) {
       await setUserAddress(restAddress);
     } else {
@@ -133,6 +157,21 @@ const AddressForm = ({ userStoredAddress = {} }: Props) => {
         <p className="text-red-500">{errors.lastName?.message}</p>
       </div>
 
+      {mode === "guest" && (
+        <div className="flex flex-col mb-2">
+          <span>Correo electrónico</span>
+          <input
+            type="email"
+            className={clsx(
+              "p-2 border rounded-md bg-gray-200 text-black",
+              { "border-red-500": errors.email }
+            )}
+            {...register("email")}
+          />
+          <p className="text-red-500">{errors.email?.message}</p>
+        </div>
+      )}
+
       <div className="flex flex-col mb-2">
         <span>Dirección</span>
         <input
@@ -162,7 +201,7 @@ const AddressForm = ({ userStoredAddress = {} }: Props) => {
 
 
       <div className="flex flex-col mb-2">
-        <span>Código postal <span className="text-brand-smoke text-xs">(opcional)</span></span>
+        <span>Código postal {mode !== "guest" && <span className="text-brand-smoke text-xs">(opcional)</span>}</span>
         <input
           type="text"
           className={
