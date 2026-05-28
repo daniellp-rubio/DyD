@@ -79,7 +79,7 @@ export default async function OrderSuccessPage({ params, searchParams }: Props) 
             ))}
           </div>
 
-          <div className="bg-palet-found-black rounded-xl shadow-xl p-7">
+          <div className="bg-gray-50 border border-gray-200 rounded-xl shadow-xl p-7">
             <h2 className="text-2xl mb-2">Dirección de entrega</h2>
             <div className="mb-10">
               <p className="text-xl">
@@ -121,7 +121,7 @@ export default async function OrderSuccessPage({ params, searchParams }: Props) 
         </div>
 
         {/* Next steps / reassurance */}
-        <div className="mt-10 bg-palet-found-black rounded-xl shadow-xl p-7">
+        <div className="mt-10 bg-gray-50 border border-gray-200 rounded-xl shadow-xl p-7">
           <h2 className="text-2xl mb-4">¿Qué sigue?</h2>
           <ul className="flex flex-col gap-3 text-sm">
             <li>📧 Te enviamos un correo con la confirmación de tu pedido.</li>

@@ -72,7 +72,7 @@ export default async function OrderPage({ params }: Props) {
           </div>
 
           {/* Order summary + payment */}
-          <div className="bg-palet-found-black rounded-xl shadow-xl p-7">
+          <div className="bg-gray-50 border border-gray-200 rounded-xl shadow-xl p-7">
             <h2 className="text-2xl mb-2">Dirección de entrega</h2>
             <div className="mb-10">
               <p className="text-xl">

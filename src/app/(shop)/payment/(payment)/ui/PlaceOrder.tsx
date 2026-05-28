@@ -93,7 +93,7 @@ const PlaceOrder = () => {
   if (!loaded) return null;
 
   return (
-    <div className="bg-palet-found-black rounded-xl shadow-xl p-7">
+    <div className="bg-gray-50 border border-gray-200 rounded-xl shadow-xl p-7">
       <h2 className="text-2xl mb-2">Direccion de entrega</h2>
       <div className="mb-10">
         <p className="text-xl">

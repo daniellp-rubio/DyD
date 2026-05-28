@@ -32,7 +32,7 @@ export default function CartPage() {
           </div>
 
 
-          <div className="bg-palet-found-black rounded-xl shadow-xl p-7 h-fit">
+          <div className="bg-gray-50 border border-gray-200 rounded-xl shadow-xl p-7 h-fit">
             <h2 className="text-2xl mb-2">Resumen de orden</h2>
 
             <OrderSummary />
