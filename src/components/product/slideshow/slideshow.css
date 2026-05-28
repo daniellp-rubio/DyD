@@ -35,3 +35,8 @@
 .mySwiper .swiper-slide-thumb-active {
   opacity: 1;
 }
+
+/* Product gallery: fill the column instead of the demo's 70% width */
+.mySwiper2 {
+  width: 100%;
+}

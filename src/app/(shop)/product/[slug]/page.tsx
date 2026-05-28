@@ -128,21 +128,25 @@ export default async function ProductPage({ params }: Props) {
         </section>
 
         <section aria-label="Detalles del producto" className="col-span-1 px-5">
-          <h1 className={`${inter.className} antialiased font-bold text-2xl md:text-3xl leading-tight mb-3`}>
+          <h1 className={`${inter.className} antialiased font-bold text-2xl md:text-3xl leading-tight mb-4`}>
             {product.title}
           </h1>
 
-          <p className="text-3xl md:text-4xl font-extrabold text-brand-orange mb-5">
-            {formatToCOP(product.price)}
-          </p>
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-5 md:sticky md:top-24">
+            <p className="text-3xl md:text-4xl font-extrabold text-brand-orange">
+              {formatToCOP(product.price)}
+            </p>
 
-          <p className="text-sm text-green-600 font-medium mb-4">
-            🚚 Pide hoy → Recibe en 2-3 días hábiles a todo Colombia
-          </p>
+            <p className="text-sm text-green-600 font-medium mt-3">
+              🚚 Pide hoy → Recibe en 2-3 días hábiles a todo Colombia
+            </p>
 
-          <StockLabel slug={product.slug} className="mb-3" />
+            <StockLabel slug={product.slug} className="mt-2" />
 
-          <AddToCart product={product} />
+            <div className="mt-4">
+              <AddToCart product={product} />
+            </div>
+          </div>
         </section>
       </div>
 
