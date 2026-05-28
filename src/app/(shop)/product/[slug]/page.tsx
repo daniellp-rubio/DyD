@@ -128,8 +128,6 @@ export default async function ProductPage({ params }: Props) {
         </section>
 
         <section aria-label="Detalles del producto" className="col-span-1 px-5">
-          <StockLabel slug={product.slug} className="mb-2" />
-
           <h1 className={`${inter.className} antialiased font-bold text-2xl md:text-3xl leading-tight mb-3`}>
             {product.title}
           </h1>
