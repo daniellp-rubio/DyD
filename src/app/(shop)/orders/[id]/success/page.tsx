@@ -9,22 +9,42 @@ import { formatToCOP } from "@/utils";
 import { IoCardOutline } from "react-icons/io5";
 
 import { PurchaseTracker } from "./PurchaseTracker";
+import { OrderProcessingView } from "./OrderProcessingView";
 
 interface Params {
   id: string;
 }
 interface Props {
   params: Promise<Params>;
+  searchParams: Promise<Record<string, string>>;
 }
 
-export default async function OrderSuccessPage({ params }: Props) {
+export default async function OrderSuccessPage({ params, searchParams }: Props) {
   const { id } = await params;
+  const sp = await searchParams;
 
   const result = await getOrderById(id);
   if (!result.ok) redirect("/");
 
   const orderById = result.orderById;
-  if (!orderById?.isPaid) redirect("/orders");
+
+  if (!orderById?.isPaid) {
+    // Detect gateway callbacks (Wompi: sp.status, MercadoPago: sp.collection_status / sp.payment_id)
+    const isGatewayCallback =
+      sp.status === "APPROVED" ||
+      sp.status === "PENDING" ||
+      !!sp.collection_id ||
+      !!sp.payment_id ||
+      !!sp.collection_status;
+
+    if (isGatewayCallback) {
+      // Show "processing" view — don't redirect, payment webhook may arrive shortly
+      return <OrderProcessingView orderId={id} />;
+    }
+
+    // No callback params and not paid → send to the specific order page to retry
+    redirect(`/orders/${id}`);
+  }
 
   return (
     <div className="flex justify-center items-center mb-54 px-10 sm:px-0">
