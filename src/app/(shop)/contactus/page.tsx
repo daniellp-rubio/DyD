@@ -18,7 +18,7 @@ const ContactUsPage = async() => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Contacto WhatsApp */}
-          <div className="bg-palet-found-black rounded-3xl shadow-md p-8 flex flex-col items-center">
+          <div className="bg-gray-50 border border-gray-200 rounded-3xl shadow-md p-8 flex flex-col items-center">
             <BsWhatsapp className="w-10 h-10  mb-4" />
             <h3 className="text-lg font-bold">CONTACTANOS</h3>
             <p className="mt-2 mb-4">
@@ -35,7 +35,7 @@ const ContactUsPage = async() => {
           </div>
 
           {/* Contacto Soporte */}
-          <div className="bg-palet-found-black rounded-3xl shadow-md p-8 flex flex-col items-center">
+          <div className="bg-gray-50 border border-gray-200 rounded-3xl shadow-md p-8 flex flex-col items-center">
             <IoChatbubblesOutline className="w-11 h-11 mb-4" />
             <h3 className="text-lg font-bold italic">CONTACTO EQUIPO DE SOPORTE</h3>
             <p className=" mt-2 mb-4">
