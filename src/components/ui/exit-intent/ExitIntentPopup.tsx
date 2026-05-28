@@ -6,10 +6,20 @@ import { IoCloseOutline } from 'react-icons/io5';
 const STORAGE_KEY = 'dyd_exit_popup_dismissed';
 const DISMISS_DAYS = 7;
 
+const SURVEY_REASONS = [
+  'Precio muy alto',
+  'Envío (costo o tiempo)',
+  'Dudas sobre el producto',
+  'No me da confianza aún',
+  'Solo estaba mirando',
+];
+
+type View = 'offer' | 'survey' | 'subscribed' | 'thanks';
+
 export const ExitIntentPopup = () => {
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
+  const [view, setView] = useState<View>('offer');
 
   useEffect(() => {
     const dismissed = localStorage.getItem(STORAGE_KEY);
@@ -54,11 +64,21 @@ export const ExitIntentPopup = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
-      setSubscribed(true);
+      setView('subscribed');
       setTimeout(() => dismiss(), 3000);
     } catch {
       dismiss();
     }
+  };
+
+  const submitSurvey = (reason: string) => {
+    fetch('/api/exit-survey', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason, path: window.location.pathname }),
+    }).catch(() => {});
+    setView('thanks');
+    setTimeout(() => dismiss(), 1500);
   };
 
   if (!show) return null;
@@ -77,13 +97,23 @@ export const ExitIntentPopup = () => {
           <IoCloseOutline size={24} />
         </button>
 
-        {subscribed ? (
+        {view === 'subscribed' && (
           <div className="py-4">
             <div className="text-4xl mb-3">🎉</div>
             <h3 className="text-xl font-bold text-brand-black mb-2">¡Listo!</h3>
             <p className="text-brand-smoke">Tu cupón <strong className="text-brand-orange">BIENVENIDO10</strong> está en camino.</p>
           </div>
-        ) : (
+        )}
+
+        {view === 'thanks' && (
+          <div className="py-4">
+            <div className="text-4xl mb-3">🙏</div>
+            <h3 className="text-xl font-bold text-brand-black mb-2">¡Gracias!</h3>
+            <p className="text-brand-smoke">Tu respuesta nos ayuda a mejorar.</p>
+          </div>
+        )}
+
+        {view === 'offer' && (
           <>
             <div className="text-4xl mb-3">⏰</div>
             <h3 className="text-2xl font-black text-brand-black mb-2">
@@ -111,8 +141,34 @@ export const ExitIntentPopup = () => {
               </button>
             </form>
 
-            <button onClick={dismiss} className="mt-3 text-xs text-gray-400 hover:text-gray-600 underline">
+            <button onClick={() => setView('survey')} className="mt-3 text-xs text-gray-400 hover:text-gray-600 underline">
               No, prefiero pagar precio completo
+            </button>
+          </>
+        )}
+
+        {view === 'survey' && (
+          <>
+            <div className="text-4xl mb-3">💬</div>
+            <h3 className="text-xl font-black text-brand-black mb-2">
+              ¿Qué te detuvo de comprar hoy?
+            </h3>
+            <p className="text-xs text-brand-smoke mb-5">Un toque. Nos ayuda a mejorar.</p>
+
+            <div className="flex flex-col gap-2">
+              {SURVEY_REASONS.map((reason) => (
+                <button
+                  key={reason}
+                  onClick={() => submitSurvey(reason)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-brand-black hover:border-brand-orange hover:bg-orange-50 transition-colors text-sm"
+                >
+                  {reason}
+                </button>
+              ))}
+            </div>
+
+            <button onClick={dismiss} className="mt-3 text-xs text-gray-400 hover:text-gray-600 underline">
+              Prefiero no responder
             </button>
           </>
         )}
