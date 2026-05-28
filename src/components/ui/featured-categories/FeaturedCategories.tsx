@@ -16,7 +16,7 @@ const categories: Category[] = [
     name: "Audio Premium",
     description: "Auriculares y parlantes",
     href: "/category/audio",
-    icon: <FaHeadphones className="w-8 h-8" />,
+    icon: <FaHeadphones className="w-14 h-14" />,
     image: undefined,
   },
   {
@@ -24,7 +24,7 @@ const categories: Category[] = [
     name: "Gaming",
     description: "Equipos de alto rendimiento",
     href: "/category/gaming",
-    icon: <FaGamepad className="w-8 h-8" />,
+    icon: <FaGamepad className="w-14 h-14" />,
     image: undefined,
   },
   {
@@ -32,7 +32,7 @@ const categories: Category[] = [
     name: "Smart Tech",
     description: "Wearables y accesorios",
     href: "/category/smart",
-    icon: <FaMobileAlt className="w-8 h-8" />,
+    icon: <FaMobileAlt className="w-14 h-14" />,
     image: undefined,
   },
   {
@@ -40,7 +40,7 @@ const categories: Category[] = [
     name: "Accesorios",
     description: "Cargadores y conectividad",
     href: "/category/accesorios",
-    icon: <FaPlug className="w-8 h-8" />,
+    icon: <FaPlug className="w-14 h-14" />,
     image: undefined,
   },
 ];
@@ -73,7 +73,7 @@ export const FeaturedCategories = () => {
                 />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-br from-brand-gray to-gray-200 flex items-center justify-center">
-                  <div className="text-brand-smoke/40 group-hover:text-brand-orange/60 transition-colors">
+                  <div className="text-brand-orange group-hover:scale-110 transition-transform duration-300">
                     {cat.icon}
                   </div>
                 </div>
@@ -85,7 +85,7 @@ export const FeaturedCategories = () => {
                 <h3 className="text-brand-black group-hover:text-brand-white font-extrabold text-lg md:text-xl transition-colors">
                   {cat.name}
                 </h3>
-                <p className="text-brand-smoke group-hover:text-brand-gray text-sm opacity-0 group-hover:opacity-100 transition-all">
+                <p className="text-brand-smoke group-hover:text-brand-gray text-sm mt-1 transition-colors">
                   {cat.description}
                 </p>
               </div>
