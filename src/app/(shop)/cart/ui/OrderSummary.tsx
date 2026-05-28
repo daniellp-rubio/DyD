@@ -43,23 +43,23 @@ const OrderSummary = () => {
         )}
       </div>
 
-      <div className="grid grid-cols-2">
-      <span>No. Productos</span>
-      <span className="text-right">{itemsInCart === 1 ? "1 producto" : `${itemsInCart} productos`}</span>
+      <div className="grid grid-cols-2 gap-y-2 text-sm">
+        <span className="text-brand-smoke">No. Productos</span>
+        <span className="text-right text-brand-black">{itemsInCart === 1 ? "1 producto" : `${itemsInCart} productos`}</span>
 
-      <span>Subtotal</span>
-      <span className="text-right">{formatToCOP(subTotal)}</span>
+        <span className="text-brand-smoke">Subtotal</span>
+        <span className="text-right text-brand-black">{formatToCOP(subTotal)}</span>
 
-      <span>Envío</span>
-      <span className="text-right">
-        {shipping === 0
-          ? <span className="text-green-600 font-semibold">Gratis</span>
-          : formatToCOP(shipping)}
-      </span>
+        <span className="text-brand-smoke">Envío</span>
+        <span className="text-right">
+          {shipping === 0
+            ? <span className="text-green-600 font-semibold">Gratis</span>
+            : <span className="text-brand-black">{formatToCOP(shipping)}</span>}
+        </span>
 
-      <span className="font-bold">Total</span>
-      <span className="text-right font-bold">{formatToCOP(total)}</span>
-    </div>
+        <span className="text-base font-bold text-brand-black border-t border-gray-200 pt-3 mt-1">Total</span>
+        <span className="text-base font-bold text-brand-black text-right border-t border-gray-200 pt-3 mt-1">{formatToCOP(total)}</span>
+      </div>
     </>
   );
 };

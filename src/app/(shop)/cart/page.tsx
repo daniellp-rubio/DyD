@@ -20,13 +20,15 @@ export default function CartPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
           <div className="flex flex-col mt-5">
-            <span className="text-xl">Agregar más items</span>
-            <Link
-              href={"/"}
-              className="underline mb-5"
-            >
-              Continúa comprando
-            </Link>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-brand-black">Tus productos</h2>
+              <Link
+                href={"/"}
+                className="text-sm text-brand-orange hover:underline"
+              >
+                ← Seguir comprando
+              </Link>
+            </div>
 
             <ProductsInCart />
           </div>
