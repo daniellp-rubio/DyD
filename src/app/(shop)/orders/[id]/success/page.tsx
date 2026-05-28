@@ -2,9 +2,10 @@ export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 
 import { getOrderById } from "@/actions";
-import { Title } from "@/components";
+import { Title, RelatedProducts } from "@/components";
 import { formatToCOP } from "@/utils";
 import { IoCardOutline } from "react-icons/io5";
 
@@ -45,6 +46,8 @@ export default async function OrderSuccessPage({ params, searchParams }: Props) 
     // No callback params and not paid → send to the specific order page to retry
     redirect(`/orders/${id}`);
   }
+
+  const firstItem = orderById.OrderItem[0]?.product;
 
   return (
     <div className="flex justify-center items-center mb-54 px-10 sm:px-0">
@@ -116,6 +119,33 @@ export default async function OrderSuccessPage({ params, searchParams }: Props) 
             </div>
           </div>
         </div>
+
+        {/* Next steps / reassurance */}
+        <div className="mt-10 bg-palet-found-black rounded-xl shadow-xl p-7">
+          <h2 className="text-2xl mb-4">¿Qué sigue?</h2>
+          <ul className="flex flex-col gap-3 text-sm">
+            <li>📧 Te enviamos un correo con la confirmación de tu pedido.</li>
+            <li>🚚 Lo preparamos y te llega en 2-3 días hábiles.</li>
+            {firstItem && (
+              <li>
+                ⭐ Cuando lo recibas,{" "}
+                <Link
+                  href={`/product/${firstItem.slug}`}
+                  className="text-brand-orange underline font-semibold"
+                >
+                  déjanos tu reseña
+                </Link>{" "}
+                — ayudas a otros compradores.
+              </li>
+            )}
+            <li>💬 ¿Dudas con tu pedido? Escríbenos por WhatsApp (botón abajo a la derecha).</li>
+          </ul>
+        </div>
+
+        {/* Cross-sell */}
+        {firstItem?.category?.id && (
+          <RelatedProducts categoryId={firstItem.category.id} excludeSlug={firstItem.slug} />
+        )}
       </div>
     </div>
   );
