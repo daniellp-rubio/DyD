@@ -2,6 +2,7 @@ import Link from "next/link";
 
 const SECTIONS: { href: string; title: string; desc: string }[] = [
   { href: "/admin/content", title: "Contenido social", desc: "Genera, revisa y aprueba posts IG/TikTok." },
+  { href: "/admin/reviews", title: "Reseñas", desc: "Modera reseñas pendientes de aprobación." },
   { href: "/admin/products", title: "Productos", desc: "Catálogo, precios y stock." },
   { href: "/admin/orders", title: "Órdenes", desc: "Pedidos y estados de pago." },
   { href: "/admin/users", title: "Usuarios", desc: "Roles y cuentas." },

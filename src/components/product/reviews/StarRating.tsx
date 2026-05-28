@@ -9,8 +9,8 @@ interface StarRatingProps {
   size?: number;
   className?: string;
   readOnly?: boolean;
-  totalRatings?: number; // 👈 Nuevo: total de calificaciones
-  showCount?: boolean;   // 👈 Nuevo: activar/desactivar el contador
+  totalRatings?: number;
+  showCount?: boolean;
 }
 
 export const StarRating: FC<StarRatingProps> = ({

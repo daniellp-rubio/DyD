@@ -17,6 +17,12 @@ enum Role {
   user
 }
 
+enum ReviewStatus {
+  pending
+  approved
+  rejected
+}
+
 model Category {
   id      String    @id @default(uuid())
   name    String    @unique
@@ -36,6 +42,7 @@ model Product {
   tags                    String[] @default([])
   position                Int
   contentId               String   @unique @default("")
+  videoUrl                String?  // YouTube, Cloudinary or MP4 URL for PDP video section
 
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   categoryId String
@@ -163,9 +170,14 @@ model OrderAddress {
 }
 
 model ProductRatings {
-  id      Int     @id @default(autoincrement())
-  rating  Int     @default(0)
-  comment String?
+  id            Int          @id @default(autoincrement())
+  rating        Int          @default(0)
+  comment       String?
+  photoUrl      String?      // Optional review photo (Cloudinary URL)
+  status        ReviewStatus @default(pending)
+  verifiedBuyer Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
@@ -175,6 +187,7 @@ model ProductRatings {
 
   @@unique([userId, productId])
   @@index([productId])
+  @@index([productId, status])
 }
 
 // ─── Content Automation ───────────────────────────────────────────────────────

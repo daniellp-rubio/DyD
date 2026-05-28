@@ -9,17 +9,14 @@ import { getProductBySlug, getTopProductSlugs, getPaginatedProductsWithImages } 
 import {
   Breadcrumbs,
   ProductMobileSlideshow,
+  ProductReviews,
   ProductSlideshow,
   ProductTabs,
   RelatedProducts
 } from "@/components";
 import StockLabel from "@/components/product/stock-label/StockLabel";
-import { ProductCard } from "@/components/product/card/Card";
-import { ProductViewTracker } from "./ui/ProductViewTracker";
-import { ViewerCount } from "./ui/ViewerCount";
-import { StarRating } from "./ui/StarRating";
-import ButtonSlide from "./ui/ButtonSlide";
 import AddToCart from "./ui/AddToCart";
+import { ProductVideo } from "./ui/ProductVideo";
 
 import { inter } from "@/config/fonts";
 import { formatToCOP } from "@/utils";
@@ -94,7 +91,7 @@ export default async function ProductPage({ params }: Props) {
         product.inStock > 0
           ? "https://schema.org/InStock"
           : "https://schema.org/OutOfStock",
-      url: `/product/${product.slug}`
+      url: `https://dydtech.com/product/${product.slug}`
     }
   };
 
@@ -141,11 +138,28 @@ export default async function ProductPage({ params }: Props) {
             {formatToCOP(product.price)}
           </p>
 
+          <p className="text-sm text-green-600 font-medium mb-4">
+            🚚 Pide hoy → Recibe en 2-3 días hábiles a todo Colombia
+          </p>
+
+          <StockLabel slug={product.slug} className="mb-3" />
+
           <AddToCart product={product} />
         </section>
       </div>
 
+      {/* Video section — only renders when a videoUrl is set for this product.
+          Cast handles the case where prisma generate hasn't been run yet. */}
+      {(product as { videoUrl?: string | null }).videoUrl && (
+        <ProductVideo
+          videoUrl={(product as { videoUrl?: string | null }).videoUrl!}
+          title={product.title}
+        />
+      )}
+
       <ProductTabs description={product.description} tags={product.tags} />
+
+      <ProductReviews productId={product.id} slug={product.slug} />
 
       {product.category?.id && (
         <Suspense fallback={null}>
