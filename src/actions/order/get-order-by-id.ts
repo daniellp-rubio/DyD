@@ -1,20 +1,31 @@
 "use server";
 
+import crypto from "crypto";
 import { auth } from "@/auth-config";
 import prisma from "@/lib/prisma";
 import { Logger } from "@/lib/logger";
 
-export const getOrderById = async (id: string) => {
+const hashToken = (raw: string) =>
+  crypto.createHash("sha256").update(raw).digest("hex");
+
+export const getOrderById = async (id: string, token?: string) => {
   const session = await auth();
-  if (!session?.user.id) {
+  const isLoggedIn = !!session?.user?.id;
+
+  if (!isLoggedIn && !token) {
     return { ok: false, message: "Debe estar autenticado" } as const;
   }
 
-  const isAdmin = session.user.role === "admin";
+  // Access: logged-in owner/admin, or a guest presenting the order's token.
+  const where = isLoggedIn
+    ? session!.user.role === "admin"
+      ? { id }
+      : { id, userId: session!.user.id }
+    : { id, userId: null, guestAccessToken: hashToken(token!) };
 
   try {
     const orderById = await prisma.order.findFirst({
-      where: isAdmin ? { id } : { id, userId: session.user.id },
+      where,
       include: {
         OrderAddress: true,
         user: { select: { email: true } },

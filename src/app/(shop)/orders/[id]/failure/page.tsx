@@ -106,7 +106,7 @@ export default async function OrderPendingPage({ params }: Props) {
                 id={orderById!.id}
                 total={orderById!.total}
                 isPaid={orderById!.isPaid}
-                buyerEmail={orderById!.user!.email}
+                buyerEmail={orderById!.user?.email ?? orderById!.OrderAddress?.email ?? ""}
               />
 
               <div className="flex items-center rounded-lg py-2 px-3.5 text-xs font-bold text-white mb-5 bg-red-500">
