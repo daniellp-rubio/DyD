@@ -36,12 +36,29 @@
   opacity: 1;
 }
 
-/* Product gallery: fill the column instead of the demo's 70% width */
+/* Product gallery: fill the column with predictable square slides
+   (overrides the leftover Swiper-demo width:70% / height:550px). */
 .mySwiper2 {
   width: 100%;
+  height: auto;
+}
+
+.mySwiper2 .swiper-slide {
+  aspect-ratio: 1 / 1;
+}
+
+.mySwiper2 .swiper-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .mySwiper {
   width: 100%;
+  height: auto;
+}
+
+.mySwiper .swiper-slide {
+  aspect-ratio: 1 / 1;
   height: auto;
 }
