@@ -5,12 +5,14 @@ import Link from "next/link";
 import { Title } from "@/components";
 import ProductsInCart from "./ui/ProductsInCart";
 import OrderSummary from "./ui/OrderSummary";
+import { CartViewTracker } from "./ui/CartViewTracker";
 
 export default function CartPage() {
 
 
   return (
     <div className="flex justify-center items-center mb-72 px-10 sm:px-0">
+      <CartViewTracker />
       <div className="flex flex-col w-[1000px]">
         <Title
           title="Carrito"
@@ -38,9 +40,19 @@ export default function CartPage() {
             <div className="mt-5 mb-2 w-full">
               <Link
                 className="flex btn-primary justify-center"
-                href="checkout/address"
+                href="/checkout/address"
               >
                 Checkout
+              </Link>
+            </div>
+
+            <div className="mt-3 text-center">
+              <p className="text-xs text-brand-smoke mb-2">¿Sin cuenta?</p>
+              <Link
+                href="/payment/withoutsession"
+                className="text-sm text-brand-black underline hover:text-brand-orange transition-colors"
+              >
+                Comprar como invitado →
               </Link>
             </div>
           </div>

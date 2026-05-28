@@ -6,6 +6,7 @@ import { auth } from "@/auth-config";
 import { Address } from "@/interfaces";
 import prisma from "@/lib/prisma";
 import { Logger } from "@/lib/logger";
+import { calculateShipping } from "@/config/shipping";
 
 const productInputSchema = z.object({
   productId: z.string().uuid(),
@@ -67,7 +68,8 @@ export const placeOrderWithoutSession = async (
     const product = products.find((p) => p.id === item.productId)!;
     subTotal += product.price * item.quantity;
   }
-  const total = subTotal;
+  const shipping = calculateShipping(subTotal);
+  const total = subTotal + shipping;
 
   // Random unguessable token; only the hash is stored.
   const accessToken = crypto.randomBytes(32).toString("base64url");

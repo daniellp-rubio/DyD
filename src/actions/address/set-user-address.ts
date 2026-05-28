@@ -11,7 +11,7 @@ const addressSchema = z.object({
   lastName: z.string().trim().min(1).max(80),
   address: z.string().trim().min(1).max(160),
   address2: z.string().trim().max(160).optional(),
-  postalCode: z.string().trim().min(1).max(20),
+  postalCode: z.string().trim().max(20).optional().default(""),
   city: z.string().trim().min(1).max(80),
   phone: z.string().trim().min(5).max(30),
 });

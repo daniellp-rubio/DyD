@@ -30,7 +30,7 @@ interface FormInputs {
   lastName: string;
   address: string;
   address2?: string;
-  postalCode: string;
+  postalCode?: string;
   city: string;
   phone: string;
   rememberAddress: boolean;
@@ -45,7 +45,7 @@ const schema = z.object({
   lastName: z.string().min(1, "El apellido es requerido."),
   address: z.string().min(1, "La dirección es requerido."),
   address2: z.string().max(50, "La dirección 2 es requerido.").optional(),
-  postalCode: z.string().min(1, "El código postal es requerido."),
+  postalCode: z.string().optional().default(""),
   city: z.string().min(1, "La cuidad es requerido."),
   phone: z.string().min(1, "El telefono es requerido."),
   rememberAddress: z.boolean()
@@ -162,7 +162,7 @@ const AddressForm = ({ userStoredAddress = {} }: Props) => {
 
 
       <div className="flex flex-col mb-2">
-        <span>Código postal</span>
+        <span>Código postal <span className="text-brand-smoke text-xs">(opcional)</span></span>
         <input
           type="text"
           className={
@@ -176,7 +176,6 @@ const AddressForm = ({ userStoredAddress = {} }: Props) => {
           {...register("postalCode")}
         />
 
-        <p className="text-red-500">{errors.postalCode?.message}</p>
       </div>
 
       <div className="flex flex-col mb-2">

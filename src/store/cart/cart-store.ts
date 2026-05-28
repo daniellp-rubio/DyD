@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { CartProduct } from "@/interfaces";
+import { calculateShipping } from "@/config/shipping";
 
 // Interface
 import { persist } from "zustand/middleware";
@@ -10,6 +11,7 @@ interface State {
   getTotalItems: () => number;
   getSummaryInformation: () => {
     subTotal: number;
+    shipping: number;
     total: number;
     itemsInCart: number;
   };
@@ -35,11 +37,13 @@ export const useCartStore = create<State>()(
         const { cart } = get();
 
         const subTotal = cart.reduce((subtotal, product) => (product.quantity * product.price) + subtotal ,0);
-        const total = subTotal ;
+        const shipping = calculateShipping(subTotal);
+        const total = subTotal + shipping;
         const itemsInCart = cart.reduce((total, item) => total + item.quantity, 0);
 
         return {
           subTotal,
+          shipping,
           total,
           itemsInCart
         };

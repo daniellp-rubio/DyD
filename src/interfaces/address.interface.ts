@@ -4,7 +4,7 @@ export interface Address {
   lastName: string;
   address: string;
   address2?: string;
-  postalCode: string;
+  postalCode?: string;
   city: string;
   phone: string;
 };

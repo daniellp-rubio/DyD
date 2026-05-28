@@ -23,7 +23,7 @@ const PlaceOrder = () => {
 
   const address = useAddressStore(state => state.address);
 
-  const { itemsInCart, subTotal, total } = useCartStore(useShallow((state) => state.getSummaryInformation()));
+  const { itemsInCart, subTotal, shipping, total } = useCartStore(useShallow((state) => state.getSummaryInformation()));
 
   const cart = useCartStore(state => state.cart);
   const clearCart = useCartStore(state => state.clearCart);
@@ -78,16 +78,35 @@ const PlaceOrder = () => {
         <span>Subtotal</span>
         <span className="text-right">{formatToCOP(subTotal)}</span>
 
-        <span>Total</span>
-        <span className="text-right">{formatToCOP(total)}</span>
+        <span>Envío</span>
+        <span className="text-right">
+          {shipping === 0
+            ? <span className="text-green-600 font-semibold">Gratis</span>
+            : formatToCOP(shipping)}
+        </span>
+
+        <span className="font-bold">Total</span>
+        <span className="text-right font-bold">{formatToCOP(total)}</span>
       </div>
 
       <div className="mt-5 mb-2 w-full">
-        <span className="text-sx">
-          Al ordenar aceptas nuestros <a href="/termsandconditions" className="underline">términos y condiciones</a> y <a href="/termsandconditions" className="underline">pólitica de privacidad</a>
+        <span className="text-xs">
+          Al ordenar aceptas nuestros <a href="/termsandconditions" className="underline">términos y condiciones</a> y <a href="/privacy-policy" className="underline">política de privacidad</a>
         </span>
 
         <p className="text-red-500">{errorMessage}</p>
+
+        <div className="flex flex-wrap gap-3 mt-4 mb-3">
+          <div className="flex items-center gap-1.5 text-xs text-brand-smoke">
+            <span className="text-green-500">🔒</span> Pago 100% seguro
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-brand-smoke">
+            <span>✓</span> Garantía 12 meses
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-brand-smoke">
+            <span>↩</span> Devolución 30 días
+          </div>
+        </div>
 
         <button
           // href="orders/123"

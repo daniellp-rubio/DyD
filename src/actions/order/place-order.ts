@@ -5,6 +5,7 @@ import { auth } from "@/auth-config";
 import { Address } from "@/interfaces";
 import prisma from "@/lib/prisma";
 import { Logger } from "@/lib/logger";
+import { calculateShipping } from "@/config/shipping";
 
 const productInputSchema = z.object({
   productId: z.string().uuid(),
@@ -16,7 +17,7 @@ const addressSchema = z.object({
   lastName: z.string().trim().min(1).max(80),
   address: z.string().trim().min(1).max(160),
   address2: z.string().trim().max(160).optional(),
-  postalCode: z.string().trim().min(1).max(20),
+  postalCode: z.string().trim().max(20).optional().default(""),
   city: z.string().trim().min(1).max(80),
   phone: z.string().trim().min(5).max(30),
 });
@@ -56,7 +57,8 @@ export const placeOrder = async (productIds: ProductToOrder[], address: Address)
     const product = products.find((p) => p.id === item.productId)!;
     subTotal += product.price * item.quantity;
   }
-  const total = subTotal;
+  const shipping = calculateShipping(subTotal);
+  const total = subTotal + shipping;
 
   try {
     const result = await prisma.$transaction(async (tx) => {
