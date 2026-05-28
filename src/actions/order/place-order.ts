@@ -3,9 +3,8 @@
 import { z } from "zod";
 import { auth } from "@/auth-config";
 import { Address } from "@/interfaces";
-import prisma from "@/lib/prisma";
 import { Logger } from "@/lib/logger";
-import { calculateShipping } from "@/config/shipping";
+import { createOrder } from "./create-order";
 
 const productInputSchema = z.object({
   productId: z.string().uuid(),
@@ -42,70 +41,9 @@ export const placeOrder = async (productIds: ProductToOrder[], address: Address)
   const items = itemsParsed.data;
   const cleanAddress = addressParsed.data;
 
-  const products = await prisma.product.findMany({
-    where: { id: { in: items.map((p) => p.productId) } },
-    select: { id: true, price: true, title: true },
-  });
-
-  if (products.length !== items.length) {
-    return { ok: false, message: "Uno o más productos no existen" };
-  }
-
-  const itemsInOrder = items.reduce((c, p) => c + p.quantity, 0);
-  let subTotal = 0;
-  for (const item of items) {
-    const product = products.find((p) => p.id === item.productId)!;
-    subTotal += product.price * item.quantity;
-  }
-  const shipping = calculateShipping(subTotal);
-  const total = subTotal + shipping;
-
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      // Atomic stock decrement: only succeeds if inStock >= quantity
-      for (const item of items) {
-        const updated = await tx.product.updateMany({
-          where: { id: item.productId, inStock: { gte: item.quantity } },
-          data: { inStock: { decrement: item.quantity } },
-        });
-        if (updated.count !== 1) {
-          throw new Error(`Stock insuficiente para ${item.productId}`);
-        }
-      }
-
-      const order = await tx.order.create({
-        data: {
-          userId,
-          itemsInOrder,
-          subTotal,
-          total,
-          OrderItem: {
-            createMany: {
-              data: items.map((p) => ({
-                quantity: p.quantity,
-                productId: p.productId,
-                price: products.find((pr) => pr.id === p.productId)!.price,
-              })),
-            },
-          },
-          OrderAddress: {
-            create: {
-              firstName: cleanAddress.firstName,
-              lastName: cleanAddress.lastName,
-              address: cleanAddress.address,
-              address2: cleanAddress.address2,
-              postalCode: cleanAddress.postalCode,
-              city: cleanAddress.city,
-              phone: cleanAddress.phone,
-            },
-          },
-        },
-      });
-
-      return { order };
-    });
-
-    return { ok: true, order: result.order };
+    const order = await createOrder(items, cleanAddress, { kind: "user", userId });
+    return { ok: true, order };
   } catch (err) {
     Logger.error({
       title: "Place Order Failed",
