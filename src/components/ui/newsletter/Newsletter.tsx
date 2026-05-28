@@ -11,11 +11,21 @@ export const Newsletter = () => {
     e.preventDefault();
     if (!email) return;
     setStatus("loading");
-    // TODO: conectar a endpoint real
-    setTimeout(() => {
-      setStatus("success");
-      setEmail("");
-    }, 800);
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (res.ok) {
+        setStatus("success");
+        setEmail("");
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      setStatus("error");
+    }
   };
 
   return (
@@ -38,29 +48,34 @@ export const Newsletter = () => {
         {status === "success" ? (
           <div className="flex items-center justify-center gap-3 text-brand-black bg-green-500/10 border border-green-500/30 rounded-xl p-4 max-w-md mx-auto">
             <FaCheckCircle className="text-green-400 w-6 h-6" />
-            <span className="font-semibold">¡Listo! Revisa tu correo para obtener tu cupón.</span>
+            <span className="font-semibold">¡Listo! Tu cupón: <strong>BIENVENIDO10</strong> — úsalo en tu próxima compra.</span>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-            <div className="relative flex-1">
-              <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-smoke" />
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu@email.com"
-                className="w-full pl-11 pr-4 py-4 rounded-xl bg-black/5 border border-black/10 text-brand-black placeholder:text-brand-smoke focus:outline-none focus:border-brand-orange focus:bg-black/10 transition-all backdrop-blur-sm"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={status === "loading"}
-              className="bg-brand-orange hover:bg-[#E64A19] text-brand-white px-8 py-4 rounded-xl font-bold transition-all shadow-lg shadow-brand-orange/30 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {status === "loading" ? "Enviando..." : "Suscribirme"}
-            </button>
-          </form>
+          <>
+            {status === "error" && (
+              <p className="text-red-500 text-sm mb-3">Ocurrió un error. Intenta de nuevo.</p>
+            )}
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <div className="relative flex-1">
+                <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-smoke" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="tu@email.com"
+                  className="w-full pl-11 pr-4 py-4 rounded-xl bg-black/5 border border-black/10 text-brand-black placeholder:text-brand-smoke focus:outline-none focus:border-brand-orange focus:bg-black/10 transition-all backdrop-blur-sm"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={status === "loading"}
+                className="bg-brand-orange hover:bg-[#E64A19] text-brand-white px-8 py-4 rounded-xl font-bold transition-all shadow-lg shadow-brand-orange/30 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {status === "loading" ? "Enviando..." : "Suscribirme"}
+              </button>
+            </form>
+          </>
         )}
 
         <p className="text-brand-smoke text-xs mt-4">
