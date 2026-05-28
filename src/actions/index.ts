@@ -25,6 +25,10 @@ export * from "./products/get-product-by-slug";
 export * from "./products/get-stock-by-slug";
 export * from "./products/get-related-products";
 export * from "./products/get-top-product-slugs";
+export * from "./products/submit-product-rating";
+export * from "./products/get-product-reviews";
+export * from "./products/get-pending-reviews";
+export * from "./products/moderate-review";
 
 export * from "./users/change-user-role";
 export * from "./users/users-paginated-users";

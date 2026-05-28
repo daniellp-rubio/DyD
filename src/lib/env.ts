@@ -57,6 +57,8 @@ const schema = z.object({
   INSTAGRAM_BUSINESS_ACCOUNT_ID: z.string().optional(),
   INSTAGRAM_ACCESS_TOKEN: z.string().optional(),
   TIKTOK_ACCESS_TOKEN: z.string().optional(),
+  // URL pública del perfil de Instagram (botón "Seguir" en la homepage)
+  NEXT_PUBLIC_INSTAGRAM_PROFILE_URL: z.string().url().optional(),
 
   // ── Roadmap automation (all optional: app boots without these keys) ──
   // Video generation provider. "local" = existing video-server (default); "fal" = fal.ai cloud.
