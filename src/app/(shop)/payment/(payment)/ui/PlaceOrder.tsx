@@ -9,8 +9,7 @@ import clsx from "clsx";
 import { placeOrderWithoutSession } from "@/actions/order/place-order-without-session";
 
 // Store
-import { useCartStore } from "@/store";
-import { useAddressWithoutSessionStore } from "@/store/address-without-session/address-without-session";
+import { useAddressStore, useCartStore } from "@/store";
 
 // Utils
 import { formatToCOP } from "@/utils";
@@ -22,7 +21,7 @@ const PlaceOrder = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
-  const address = useAddressWithoutSessionStore(state => state.address);
+  const address = useAddressStore(state => state.address);
 
   const { itemsInCart, subTotal, shipping, total } = useCartStore(useShallow((state) => state.getSummaryInformation()));
 
@@ -88,7 +87,7 @@ const PlaceOrder = () => {
     });
 
     clearCart();
-    router.replace(`/orderswithoutsession/${resp.order!.id}?email=${encodeURIComponent(address.email)}`);
+    router.replace(`/orderswithoutsession/${resp.order!.id}?email=${encodeURIComponent(address.email ?? "")}`);
   };
 
   if (!loaded) return null;
