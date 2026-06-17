@@ -3,10 +3,10 @@
 import { useEffect, useRef } from "react";
 
 import { useCartStore } from "@/store";
+import { trackMeta } from "@/lib/fbpixel";
 
 declare global {
   interface Window {
-    fbq?: (...args: unknown[]) => void;
     gtag?: (...args: unknown[]) => void;
   }
 }
@@ -31,7 +31,8 @@ export const CartViewTracker = () => {
         quantity: p.quantity,
       })),
     });
-    window.fbq?.("track", "ViewCart", {
+
+    trackMeta("ViewCart", {
       content_ids: cart.map(p => p.id),
       content_type: "product",
       contents: cart.map(p => ({ id: p.id, quantity: p.quantity })),

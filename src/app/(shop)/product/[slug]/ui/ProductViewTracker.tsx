@@ -2,9 +2,10 @@
 
 import { useEffect } from "react";
 
+import { trackMeta } from "@/lib/fbpixel";
+
 declare global {
   interface Window {
-    fbq?: (...args: unknown[]) => void;
     gtag?: (...args: unknown[]) => void;
   }
 }
@@ -33,10 +34,11 @@ export const ProductViewTracker = ({ product }: Props) => {
       ],
     });
 
-    window.fbq?.("track", "ViewContent", {
+    trackMeta("ViewContent", {
       content_ids: [product.id],
       content_name: product.title,
       content_type: "product",
+      contents: [{ id: product.id, quantity: 1 }],
       value: product.price,
       currency: "COP",
     });

@@ -9,10 +9,10 @@ import { getStockBySlug } from "@/actions";
 import { CartProduct, Product } from "@/interfaces";
 import { useCartStore } from "@/store";
 import { formatToCOP } from "@/utils";
+import { trackMeta } from "@/lib/fbpixel";
 
 declare global {
   interface Window {
-    fbq?: (...args: unknown[]) => void;
     gtag?: (...args: unknown[]) => void;
   }
 }
@@ -79,7 +79,7 @@ const AddToCart = ({ product }: Props) => {
         },
       ],
     });
-    window.fbq?.("track", "AddToCart", {
+    trackMeta("AddToCart", {
       content_ids: [product.id],
       content_name: product.title,
       content_type: "product",
