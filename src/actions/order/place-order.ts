@@ -4,7 +4,7 @@ import { z } from "zod";
 import { auth } from "@/auth-config";
 import { Address } from "@/interfaces";
 import { Logger } from "@/lib/logger";
-import { createOrder } from "./create-order";
+import { createOrder, cleanTracking, type OrderTracking } from "./create-order";
 
 const productInputSchema = z.object({
   productId: z.string().uuid(),
@@ -26,7 +26,11 @@ interface ProductToOrder {
   quantity: number;
 }
 
-export const placeOrder = async (productIds: ProductToOrder[], address: Address) => {
+export const placeOrder = async (
+  productIds: ProductToOrder[],
+  address: Address,
+  tracking?: OrderTracking,
+) => {
   const session = await auth();
   const userId = session?.user.id;
 
@@ -42,7 +46,12 @@ export const placeOrder = async (productIds: ProductToOrder[], address: Address)
   const cleanAddress = addressParsed.data;
 
   try {
-    const order = await createOrder(items, cleanAddress, { kind: "user", userId });
+    const order = await createOrder(
+      items,
+      cleanAddress,
+      { kind: "user", userId },
+      cleanTracking(tracking),
+    );
     return { ok: true, order };
   } catch (err) {
     Logger.error({

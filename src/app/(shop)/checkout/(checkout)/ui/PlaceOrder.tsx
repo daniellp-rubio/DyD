@@ -13,6 +13,7 @@ import { useAddressStore, useCartStore } from "@/store";
 
 // Utils
 import { formatToCOP } from "@/utils";
+import { getCookie } from "@/lib/fbpixel";
 
 const PlaceOrder = () => {
   const router = useRouter();
@@ -40,7 +41,10 @@ const PlaceOrder = () => {
       quantity: product.quantity
     }));
 
-    const resp = await placeOrder(productsToOrder, address);
+    const resp = await placeOrder(productsToOrder, address, {
+      fbp: getCookie("_fbp"),
+      fbc: getCookie("_fbc"),
+    });
     if (!resp.ok) {
       setIsPlacingOrder(false);
       setErrorMessage(resp.message!);

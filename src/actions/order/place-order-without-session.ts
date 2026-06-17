@@ -5,7 +5,7 @@ import { z } from "zod";
 import { auth } from "@/auth-config";
 import { Address } from "@/interfaces";
 import { Logger } from "@/lib/logger";
-import { createOrder } from "./create-order";
+import { createOrder, cleanTracking, type OrderTracking } from "./create-order";
 
 const productInputSchema = z.object({
   productId: z.string().uuid(),
@@ -34,6 +34,7 @@ export const placeOrderWithoutSession = async (
   productIds: ProductToOrder[],
   address: Address,
   guestEmail?: string,
+  tracking?: OrderTracking,
 ) => {
   const session = await auth();
   if (session?.user.id) {
@@ -57,11 +58,16 @@ export const placeOrderWithoutSession = async (
   const accessTokenHash = hashToken(accessToken);
 
   try {
-    const order = await createOrder(items, cleanAddress, {
-      kind: "guest",
-      email: emailParsed.data,
-      accessTokenHash,
-    });
+    const order = await createOrder(
+      items,
+      cleanAddress,
+      {
+        kind: "guest",
+        email: emailParsed.data,
+        accessTokenHash,
+      },
+      cleanTracking(tracking),
+    );
     return { ok: true, order, accessToken };
   } catch (err) {
     Logger.error({

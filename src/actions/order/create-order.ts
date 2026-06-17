@@ -20,6 +20,20 @@ type OrderOwner =
   | { kind: "user"; userId: string }
   | { kind: "guest"; email?: string; accessTokenHash: string };
 
+/** Meta click identifiers captured at checkout (cookies _fbp/_fbc). */
+export interface OrderTracking {
+  fbp?: string;
+  fbc?: string;
+}
+
+/** Drop anything that isn't a short non-empty string before persisting. */
+export const cleanTracking = (t?: OrderTracking): OrderTracking | undefined => {
+  if (!t) return undefined;
+  const pick = (v?: string) =>
+    typeof v === "string" && v.length > 0 && v.length <= 256 ? v : undefined;
+  return { fbp: pick(t.fbp), fbc: pick(t.fbc) };
+};
+
 /**
  * Shared order-creation logic for both the authenticated and guest checkout
  * actions. Prices come from the DB (never the client). Stock is decremented
@@ -31,6 +45,7 @@ export async function createOrder(
   items: OrderLineInput[],
   address: CleanAddress,
   owner: OrderOwner,
+  tracking?: OrderTracking,
 ) {
   const products = await prisma.product.findMany({
     where: { id: { in: items.map((p) => p.productId) } },
@@ -68,6 +83,8 @@ export async function createOrder(
         itemsInOrder,
         subTotal,
         total,
+        fbp: tracking?.fbp,
+        fbc: tracking?.fbc,
         OrderItem: {
           createMany: {
             data: items.map((p) => ({
