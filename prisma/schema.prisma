@@ -135,6 +135,12 @@ model Order {
 
   transactionId String?
 
+  // Meta click identifiers (_fbp/_fbc cookies) captured at checkout, so the
+  // server-side Purchase (MP webhook) keeps browser match quality even when the
+  // buyer never returns to /success.
+  fbp String?
+  fbc String?
+
   @@index([userId])
   @@index([createdAt])
 }

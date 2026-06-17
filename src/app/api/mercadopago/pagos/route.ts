@@ -4,6 +4,7 @@ import { MercadoPagoConfig, Payment } from "mercadopago";
 
 import prisma from "@/lib/prisma";
 import { Logger } from "@/lib/logger";
+import { sendOrderPurchaseEvent } from "@/lib/meta/purchase";
 
 const mercadopago = new MercadoPagoConfig({
   accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN!,
@@ -163,6 +164,9 @@ async function handleApprovedPayment(payment: MpPayment) {
       paidAt: new Date(),
     },
   });
+
+  // Server-side Purchase (deduped vs the browser pixel by purchase_<orderId>).
+  await sendOrderPurchaseEvent(orderId);
 }
 
 async function safeGetPayment(paymentId: string, retries = 3, delayMs = 1500): Promise<MpPayment> {

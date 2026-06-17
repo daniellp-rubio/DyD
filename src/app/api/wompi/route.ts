@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import prisma from "@/lib/prisma";
 import { Logger } from "@/lib/logger";
+import { sendOrderPurchaseEvent } from "@/lib/meta/purchase";
 
 const EVENTS_SECRET = process.env.WOMPI_EVENTS_SECRET;
 // Tolerance in centavos (1 COP = 100 centavos)
@@ -147,6 +148,9 @@ export async function POST(req: NextRequest) {
         paidAt: new Date(),
       },
     });
+
+    // Server-side Purchase (deduped vs the browser pixel by purchase_<orderId>).
+    await sendOrderPurchaseEvent(reference);
 
     Logger.info({
       title: "Wompi Order Paid",

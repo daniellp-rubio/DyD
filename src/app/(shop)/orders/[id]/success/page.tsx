@@ -48,10 +48,16 @@ export default async function OrderSuccessPage({ params, searchParams }: Props) 
   }
 
   const firstItem = orderById.OrderItem[0]?.product;
+  const purchaseContentIds = orderById.OrderItem.map((item) => item.product.id);
 
   return (
     <div className="flex justify-center items-center mb-54 px-10 sm:px-0">
-      <PurchaseTracker orderId={orderById.id} total={orderById.total} />
+      <PurchaseTracker
+        orderId={orderById.id}
+        total={orderById.total}
+        contentIds={purchaseContentIds}
+        numItems={orderById.itemsInOrder}
+      />
       <div className="flex flex-col w-[1000px]">
         <Title title={`Orden  #${id.split("-").at(-1)}`} />
 
