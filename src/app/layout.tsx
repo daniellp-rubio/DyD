@@ -30,6 +30,10 @@ export default function RootLayout({
   return (
     <html lang="es-CO">
       <head>
+        {/* Adelanta la conexión al CDN de imágenes (mejora LCP en PDP) */}
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+
         {/* <!-- Meta Pixel Code --> */}
           <Script id="facebook-pixel" strategy="afterInteractive">
             {`
@@ -54,7 +58,7 @@ export default function RootLayout({
               width="1"
               alt=""
               style={{ display: "none" }}
-              src="https://www.facebook.com/tr?id=4077092855881726&ev=PageView&noscript=1"
+              src={`https://www.facebook.com/tr?id=${process.env.META_PIXEL_ID}&ev=PageView&noscript=1`}
             />
           </noscript>
         {/* <!-- End Meta Pixel Code --> */}
